@@ -60,7 +60,7 @@ defmodule Web3.Utils do
       @spec is_address(String.t()) ::
               {:ok, String.t()}
               | {:error, :invalid_length | :invalid_characters | :invalid_checksum}
-      def is_address(address), do: Web3.Type.Hash.Address.validate(address)
+      def is_address(address), do: Web3.Type.Address.validate(address)
     end
   end
 end
