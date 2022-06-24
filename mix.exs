@@ -25,7 +25,9 @@ defmodule Web3.MixProject do
       {:jason, "~> 1.3"},
       {:ecto, "~> 3.7", options: true},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:ex_keccak, "~> 0.4.0"}
+      {:ex_keccak, "~> 0.4.0"},
+      {:httpoison, "~> 1.8", options: true},
+      {:mox, "~> 1.0", only: [:test]}
     ]
   end
 end
