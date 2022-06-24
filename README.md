@@ -1,21 +1,4 @@
-# Web3
+# :construction: Web3 :construction:
 
-**TODO: Add description**
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `web3` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:web3, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/web3>.
+A Elixir library for interacting with Ethereum, inspired by [web3.py](https://github.com/ethereum/web3.py). It’s provides a high level, user friendly json RPC API.
 
