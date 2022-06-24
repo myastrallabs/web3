@@ -22,6 +22,12 @@ defmodule Web3 do
         %{id: 1, jsonrpc: "2.0", method: "eth_getBalance", params: [address, block_identifier]}
         |> json_rpc(json_rpc_arguments())
       end
+
+      @doc "eth_blockNumber/0"
+      def eth_blockNumber() do
+        %{id: 1, jsonrpc: "2.0", method: "eth_blockNumber", params: []}
+        |> json_rpc(json_rpc_arguments())
+      end
     end
   end
 

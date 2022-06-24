@@ -6,25 +6,14 @@ defmodule Web3.HTTP.MoxTest do
 
   use ExUnit.Case, async: true
 
-  # import Web3.HTTP.Case
   import Mox
-
-  def http_options do
-    [recv_timeout: 60_000, timeout: 60_000, hackney: [pool: :web3]]
-  end
-
-  def url do
-    "ETHEREUM_JSONRPC_HTTP_URL"
-    |> System.get_env()
-    |> Kernel.||("https://example.com")
-  end
 
   setup do
     %{
       json_rpc_arguments: [
         http: Web3.HTTP.Mox,
-        url: url(),
-        http_options: http_options()
+        url: "http://path_to_url.com",
+        http_options: [recv_timeout: 60_000, timeout: 60_000, hackney: [pool: :web3]]
       ]
     }
   end
