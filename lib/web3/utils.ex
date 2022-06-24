@@ -44,6 +44,23 @@ defmodule Web3.Utils do
       @spec to_hex(non_neg_integer() | String.t()) :: String.t()
       def to_hex(integer) when is_integer(integer), do: "0x" <> Integer.to_string(integer, 16)
       def to_hex("0x" <> _ = hex_str), do: hex_str
+
+      @doc """
+      Validates a hexadecimal encoded string to see if it conforms to an address.
+
+      ## Examples
+
+        iex> Web3.is_address("0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")
+        {:ok, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d"}
+
+        iex> Web3.is_address("0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232H")
+        {:error, :invalid_characters}
+
+      """
+      @spec is_address(String.t()) ::
+              {:ok, String.t()}
+              | {:error, :invalid_length | :invalid_characters | :invalid_checksum}
+      def is_address(address), do: Web3.Type.Address.validate(address)
     end
   end
 end
