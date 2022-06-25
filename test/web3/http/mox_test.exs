@@ -82,7 +82,7 @@ defmodule Web3.HTTP.MoxTest do
       block_number_set = MapSet.new(block_numbers)
 
       response_block_number_set =
-        Enum.into(responses, MapSet.new(), fn %{result: %{"number" => quantity}} ->
+        Enum.into(responses, MapSet.new(), fn %{result: %{number: quantity}} ->
           Web3.to_integer(quantity)
         end)
 
