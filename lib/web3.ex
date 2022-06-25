@@ -31,7 +31,8 @@ defmodule Web3 do
         {:eth_getBlockByHash, args: 2},
         {:eth_getBlockByNumber, args: 2},
         {:eth_getTransactionCount, args: 2, return_fn: :hex},
-        {:eth_getLogs, args: 1}
+        {:eth_getLogs, args: 1},
+        {:eth_sendRawTransaction, args: 1}
       ]
 
       @app_id unquote(opts[:id])
