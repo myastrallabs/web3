@@ -1,5 +1,9 @@
 defmodule Web3.Middleware.Parser do
-  @moduledoc false
+  @moduledoc """
+  Wrapping before_dispatch and after_dispatch the request to JSON RPC API.
+
+  NOTE: Awkward naming
+  """
 
   @behaviour Web3.Middleware
 
