@@ -111,7 +111,7 @@ defmodule Web3.HTTP do
     response = Keyword.fetch!(named_arguments, :response)
     response_body = Keyword.fetch!(response, :body)
 
-    with {:error, _} <- Jason.decode(response_body) do
+    with {:error, _} <- Jason.decode(response_body, keys: :atoms) do
       case Keyword.fetch!(response, :status_code) do
         # CloudFlare protected server return HTML errors for 502, so the JSON decode will fail
         502 ->
@@ -144,8 +144,8 @@ defmodule Web3.HTTP do
 
   defp handle_response(resp, 200) do
     case resp do
-      %{"error" => error} -> {:error, standardize_error(error)}
-      %{"result" => result} -> {:ok, result}
+      %{error: error} -> {:error, standardize_error(error)}
+      %{result: result} -> {:ok, result}
     end
   end
 
@@ -155,28 +155,28 @@ defmodule Web3.HTTP do
 
   # restrict response to only those fields supported by the JSON-RPC 2.0 standard, which means that level of keys is
   # validated, so we can indicate that with switch to atom keys.
-  def standardize_response(%{"jsonrpc" => "2.0" = jsonrpc, "id" => id} = unstandardized) do
+  def standardize_response(%{jsonrpc: "2.0" = jsonrpc, id: id} = unstandardized) do
     # Nethermind return string ids
     id = to_integer(id)
 
     standardized = %{jsonrpc: jsonrpc, id: id}
 
     case unstandardized do
-      %{"result" => _, "error" => _} ->
+      %{result: _, error: _} ->
         raise ArgumentError,
               "result and error keys are mutually exclusive in JSONRPC 2.0 response objects, but got #{inspect(unstandardized)}"
 
-      %{"result" => result} ->
+      %{result: result} ->
         Map.put(standardized, :result, result)
 
-      %{"error" => error} ->
+      %{error: error} ->
         Map.put(standardized, :error, standardize_error(error))
     end
   end
 
   # restrict error to only those fields supported by the JSON-RPC 2.0 standard, which means that level of keys is
   # validated, so we can indicate that with switch to atom keys.
-  def standardize_error(%{"code" => code, "message" => message} = unstandardized)
+  def standardize_error(%{code: code, message: message} = unstandardized)
       when is_integer(code) and is_binary(message) do
     standardized = %{code: code, message: message}
 

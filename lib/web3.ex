@@ -18,7 +18,8 @@ defmodule Web3 do
       Module.register_attribute(__MODULE__, :registered_methods, accumulate: true)
 
       @default_middleware [
-        Web3.Middleware.Parser
+        Web3.Middleware.Parser,
+        Web3.Middleware.ResponseFormatter
         # Web3.Middleware.Logger
       ]
 
@@ -26,11 +27,11 @@ defmodule Web3 do
         {:eth_blockNumber, return_fn: :hex},
         {:eth_getBalance, args: 2, return_fn: :hex},
         {:eth_gasPrice, return_fn: :hex},
-        # {:eth_getTransactionReceipt, args: 1},
+        {:eth_getTransactionReceipt, args: 1},
         # {:eth_getBlockByHash, args: 2},
         # {:eth_getBlockByNumber, args: 2},
         # {:eth_getTransactionCount, args: 2, return_fn: :hex},
-        # {:eth_getLogs, args: 1}
+        {:eth_getLogs, args: 1}
       ]
 
       @app_id unquote(opts[:id])
@@ -95,6 +96,9 @@ defmodule Web3 do
   def json_rpc(payload, json_rpc_arguments), do: HTTP.json_rpc(payload, json_rpc_arguments)
 
   defp defdispatch(method, opts \\ []) do
+    # validate method
+    # :ok = parse_method(method)
+
     arg_number = Keyword.get(opts, :args, 0)
     method_name = Keyword.get(opts, :name, method)
     return_fn = Keyword.get(opts, :return_fn, :raw)
@@ -140,7 +144,9 @@ defmodule Web3 do
 
   @register_methods [
     :eth_blockNumber,
-    :eth_getBalance
+    :eth_getBalance,
+    :eth_gasPrice,
+    :eth_getTransactionReceipt
   ]
 
   def parse_method(method) do
