@@ -9,30 +9,30 @@ defmodule Web3.Middleware.Logger do
   import Pipeline
 
   def before_dispatch(%Pipeline{} = pipeline) do
-    Logger.info(fn -> "dispatch start #{inspect(pipeline)}" end)
+    Logger.info(fn -> "Dispatch start #{inspect(pipeline)}" end)
 
     assign(pipeline, :started_at, DateTime.utc_now())
   end
 
   def after_dispatch(%Pipeline{} = pipeline) do
     Logger.info(fn ->
-      "succeeded in #{inspect(pipeline)} #{formatted_diff(delta(pipeline))}"
+      "Dispatch succeeded in #{inspect(pipeline)} #{formatted_diff(delta(pipeline))}"
     end)
 
     pipeline
   end
 
   def after_failure(%Pipeline{assigns: %{error: error, error_reason: error_reason}} = pipeline) do
-    Logger.info(fn ->
-      "failed #{inspect(error)} in #{formatted_diff(delta(pipeline))}, due to: #{inspect(error_reason)}"
+    Logger.error(fn ->
+      "Failed #{inspect(error)} in #{formatted_diff(delta(pipeline))}, due to: #{inspect(error_reason)}"
     end)
 
     pipeline
   end
 
   def after_failure(%Pipeline{assigns: %{error: error}} = pipeline) do
-    Logger.info(fn ->
-      "failed #{inspect(error)} in #{formatted_diff(delta(pipeline))}"
+    Logger.error(fn ->
+      "Failed #{inspect(error)} in #{formatted_diff(delta(pipeline))}"
     end)
 
     pipeline

@@ -19,12 +19,18 @@ defmodule Web3 do
 
       @default_middleware [
         Web3.Middleware.Parser
-        # Web3.Middleware.Logger,
+        # Web3.Middleware.Logger
       ]
 
       @default_methods [
-        {:eth_blockNumber, args: 0, return_fn: :hex},
-        {:eth_getBalance, args: 2, return_fn: :hex}
+        {:eth_blockNumber, return_fn: :hex},
+        {:eth_getBalance, args: 2, return_fn: :hex},
+        {:eth_gasPrice, return_fn: :hex},
+        # {:eth_getTransactionReceipt, args: 1},
+        # {:eth_getBlockByHash, args: 2},
+        # {:eth_getBlockByNumber, args: 2},
+        # {:eth_getTransactionCount, args: 2, return_fn: :hex},
+        # {:eth_getLogs, args: 1}
       ]
 
       @app_id unquote(opts[:id])
@@ -90,7 +96,6 @@ defmodule Web3 do
 
   defp defdispatch(method, opts \\ []) do
     arg_number = Keyword.get(opts, :args, 0)
-
     method_name = Keyword.get(opts, :name, method)
     return_fn = Keyword.get(opts, :return_fn, :raw)
     middleware = Keyword.get(opts, :middleware, [])
@@ -155,8 +160,8 @@ defmodule Web3 do
     :return_fn
   ]
 
-  defp parse_opts([{:name, alias} | opts], result) when is_binary(alias) do
-    parse_opts(opts, [{:name, String.to_atom(alias)} | result])
+  defp parse_opts([{:name, alias_name} | opts], result) when is_binary(alias_name) do
+    parse_opts(opts, [{:name, String.to_atom(alias_name)} | result])
   end
 
   defp parse_opts([{param, value} | opts], result) when param in @register_params do
