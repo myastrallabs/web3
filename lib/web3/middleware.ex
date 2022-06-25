@@ -1,15 +1,16 @@
 defmodule Web3.Middleware do
   @moduledoc """
   Middleware provides an extension point to add functions that you want to be
-  called for every method the router dispatches.
-
-  Examples include method signer, and logging.
+  called for every method JSON RPC API.
 
   Implement the `Web3.Middleware` behaviour in your module and define the
   `c:before_dispatch/1`, `c:after_dispatch/1`, and `c:after_failure/1` callback
   functions.
 
-  Middleware inspired by [Commanded](https://github.com/commanded/commanded)
+  Middleware inspired by
+
+    - [Commanded](https://github.com/commanded/commanded)
+    - [Absinthe](https://github.com/absinthe-graphql/absinthe)
 
   ## Example middleware
 
