@@ -1,7 +1,7 @@
 defmodule Web3.Dummy do
   @moduledoc false
   use Web3,
-    name: :bsc_mainnet,
+    id: :bsc_mainnet,
     chain_id: 56,
     json_rpc_arguments: [
       url: "https://bsc-dataseed4.ninicoin.io/",
@@ -12,4 +12,8 @@ defmodule Web3.Dummy do
         hackney: [pool: :web3]
       ]
     ]
+
+  middleware(Web3.Middleware.CustomLogger)
+
+  # dispatch(:eth_getBalance, args: 2, return_fn: :hex)
 end
