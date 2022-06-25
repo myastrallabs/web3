@@ -11,7 +11,7 @@ defmodule Web3Test do
 
   defmodule Dummy do
     use Web3,
-      name: :bsc_mainnet,
+      id: :bsc_mainnet,
       chain_id: 56,
       json_rpc_arguments: [
         url: "http://path_to_url.com",
@@ -29,18 +29,18 @@ defmodule Web3Test do
         {:ok, %{body: body, status_code: 200}}
       end)
 
-      assert {:ok, "0x1"} = Dummy.eth_getBalance("0x0000000000000000000000000000000000000000", "latest")
+      assert {:ok, 1} = Dummy.eth_getBalance("0x0000000000000000000000000000000000000000", "latest")
     end
 
     test "eth_blockNumber/2" do
       Web3.HTTP.Mox
       |> expect(:json_rpc, fn _url, _json, _options ->
-        body = %{jsonrpc: "2.0", id: 1, result: 100} |> Jason.encode!()
+        body = %{jsonrpc: "2.0", id: 1, result: Web3.to_hex(1)} |> Jason.encode!()
 
         {:ok, %{body: body, status_code: 200}}
       end)
 
-      assert {:ok, 100} = Dummy.eth_blockNumber()
+      assert {:ok, 1} = Dummy.eth_blockNumber()
     end
   end
 end

@@ -29,8 +29,6 @@ defmodule Web3.Dispatcher do
 
     pipeline = before_dispatch(pipeline, payload)
 
-    IO.inspect(pipeline, label: "pipeline")
-
     unless Pipeline.halted?(pipeline) do
       pipeline
       |> execute(payload)
@@ -47,9 +45,7 @@ defmodule Web3.Dispatcher do
 
     result = Web3.json_rpc(request, json_rpc_args)
 
-    IO.inspect(result, label: "result")
-
-    # FIXME [] retry is here
+    # TODO [] retry if result is error
     case result do
       {:ok, response} ->
         pipeline

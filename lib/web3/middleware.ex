@@ -9,6 +9,8 @@ defmodule Web3.Middleware do
   `c:before_dispatch/1`, `c:after_dispatch/1`, and `c:after_failure/1` callback
   functions.
 
+  Middleware inspired by [Commanded](https://github.com/commanded/commanded)
+
   ## Example middleware
 
       defmodule NoOpMiddleware do

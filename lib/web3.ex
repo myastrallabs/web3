@@ -23,7 +23,8 @@ defmodule Web3 do
       ]
 
       @default_methods [
-        {:eth_blockNumber, args: 0, return_fn: :hex}
+        {:eth_blockNumber, args: 0, return_fn: :hex},
+        {:eth_getBalance, args: 2, return_fn: :hex}
       ]
 
       @app_id unquote(opts[:id])
