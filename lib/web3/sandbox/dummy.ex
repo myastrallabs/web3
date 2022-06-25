@@ -12,8 +12,4 @@ defmodule Web3.Dummy do
         hackney: [pool: :web3]
       ]
     ]
-
-  middleware(Web3.Middleware.CustomLogger)
-
-  # dispatch(:eth_getBalance, args: 2, return_fn: :hex)
 end
