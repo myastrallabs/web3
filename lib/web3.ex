@@ -28,9 +28,9 @@ defmodule Web3 do
         {:eth_getBalance, args: 2, return_fn: :hex},
         {:eth_gasPrice, return_fn: :hex},
         {:eth_getTransactionReceipt, args: 1},
-        # {:eth_getBlockByHash, args: 2},
-        # {:eth_getBlockByNumber, args: 2},
-        # {:eth_getTransactionCount, args: 2, return_fn: :hex},
+        {:eth_getBlockByHash, args: 2},
+        {:eth_getBlockByNumber, args: 2},
+        {:eth_getTransactionCount, args: 2, return_fn: :hex},
         {:eth_getLogs, args: 1}
       ]
 
