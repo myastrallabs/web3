@@ -47,15 +47,11 @@ defmodule Web3.ABI.Compiler do
       @app_id unquote(opts[:id])
       @chain_id unquote(opts[:chain_id])
       @json_rpc_arguments unquote(opts[:json_rpc_arguments])
+      @middleware unquote(opts[:middleware])
+
       @external_resource unquote(abi_path)
       @abi unquote(Macro.escape(abi))
       @contract_address unquote(contract_address)
-
-      @middleware [
-        Web3.Middleware.Parser,
-        Web3.Middleware.RequestInspector,
-        Web3.Middleware.ResponseFormatter
-      ]
 
       def abi(), do: @abi
       def address(), do: @contract_address
@@ -64,7 +60,7 @@ defmodule Web3.ABI.Compiler do
 
       unquote(event_defs)
 
-      def events(), do: @events |> Map.new() |> Map.values()
+      def events(), do: @events
 
       @events_lookup Map.new(@events)
 
@@ -85,50 +81,6 @@ defmodule Web3.ABI.Compiler do
       unquote(function_defs)
     end
   end
-
-  # defmacro __before_compile__(env) do
-  #   default_middleware =
-  #     env.module
-  #     |> Module.get_attribute(:default_middleware, [])
-  #     |> Enum.reverse()
-
-  #   registered_middleware =
-  #     env.module
-  #     |> Module.get_attribute(:registered_middleware, [])
-  #     |> Enum.reverse()
-
-  #   middleware =
-  #     Enum.reduce(default_middleware, registered_middleware, fn middleware, acc ->
-  #       [middleware | acc]
-  #     end)
-
-  #   app_id = env.module |> Module.get_attribute(:app_id)
-  #   abis = env.module |> Module.get_attribute(:abis)
-  #   chain_id = env.module |> Module.get_attribute(:chain_id)
-  #   json_rpc_arguments = env.module |> Module.get_attribute(:json_rpc_arguments)
-
-  #   opts = [
-  #     middleware: middleware,
-  #     json_rpc_arguments: json_rpc_arguments,
-  #     chain_id: chain_id,
-  #     app_id: app_id
-  #   ]
-
-  #   function_defs =
-  #     for %Function{} = function_abi <- abis do
-  #       deffunction(function_abi, opts)
-  #     end
-
-  #   quote generated: true do
-  #     unquote(function_defs)
-  #   end
-  # end
-
-  # defmacro middleware(middleware_module) do
-  #   quote do
-  #     @registered_middleware unquote(middleware_module)
-  #   end
-  # end
 
   def parse_abi_file(file_name) do
     file_name

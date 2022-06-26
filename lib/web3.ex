@@ -49,7 +49,7 @@ defmodule Web3 do
   end
 
   defmacro __before_compile__(env) do
-    golbal_opts = env.module |> Module.get_attribute(:opts)
+    global_opts = env.module |> Module.get_attribute(:opts)
 
     # middleware
     default_middleware = env.module |> Module.get_attribute(:default_middleware, []) |> Enum.reverse()
@@ -67,7 +67,7 @@ defmodule Web3 do
     dispatch_defs =
       for {method, opts} <- methods do
         new_opts =
-          golbal_opts
+          global_opts
           |> Keyword.merge(opts)
           |> Keyword.put(:middleware, middleware)
 
@@ -79,7 +79,7 @@ defmodule Web3 do
         contract_name = Module.concat(__CALLER__.module, contract_name)
 
         new_opts =
-          golbal_opts
+          global_opts
           |> Keyword.merge(opts)
           |> Keyword.put(:middleware, middleware)
 
