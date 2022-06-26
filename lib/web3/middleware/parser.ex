@@ -36,7 +36,10 @@ defmodule Web3.Middleware.Parser do
   end
 
   def after_dispatch(%Pipeline{response: {:ok, response}, return_fn: return_fn} = pipeline) do
-    result = decode_value(response, return_fn)
+    result =
+      response
+      |> decode_value(return_fn)
+      |> unwrap()
 
     pipeline
     |> respond({:ok, result})
@@ -79,4 +82,15 @@ defmodule Web3.Middleware.Parser do
   def decode_value(return_value, :raw), do: return_value
   def decode_value("0x" <> return_value, :hex), do: String.to_integer(return_value, 16)
   def decode_value(return_value, decoder) when is_function(decoder, 1), do: decoder.(return_value)
+
+  def decode_value("0x" <> return_value, return_types) do
+    {:ok, data} = Base.decode16(return_value, case: :mixed)
+    Web3.ABI.TypeDecoder.decode_data(data, return_types)
+  end
+
+  defp unwrap([]), do: nil
+  defp unwrap({:ok, value}), do: unwrap(value)
+  defp unwrap([value]), do: value
+  defp unwrap(values) when is_list(values), do: List.to_tuple(values)
+  defp unwrap(value), do: value
 end

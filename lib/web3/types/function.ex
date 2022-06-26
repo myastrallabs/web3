@@ -1,6 +1,10 @@
 defmodule Web3.Type.Function do
   @moduledoc false
 
+  alias Web3.Dispatcher
+
+  alias Web3.Type.{Address, Data, HexDigit, Full}
+
   defstruct [
     :name,
     :inputs,
@@ -9,8 +13,6 @@ defmodule Web3.Type.Function do
     :payable,
     :state_mutability
   ]
-
-  alias Web3.Type.{Address, Data, HexDigit, Full}
 
   defmacro __using__(opts) do
     function = opts[:function]
@@ -119,7 +121,17 @@ defmodule Web3.Type.Function do
             Keyword.merge([to: @contract_address], opts)
           )
 
-        {{:eth_call, [tco, block]}, unquote(Macro.escape(return_types))}
+        payload = %Dispatcher.Payload{
+          app_id: @app_id,
+          json_rpc_args: @json_rpc_args,
+          chain_id: @chain_id,
+          args: [tco, block],
+          method: :eth_call,
+          return_fn: unquote(Macro.escape(return_types)),
+          middleware: @middleware
+        }
+
+        Dispatcher.dispatch(payload)
       end
     end
   end
