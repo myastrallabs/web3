@@ -1,5 +1,7 @@
 defmodule Web3.Middleware.RequestInspector do
-  @moduledoc false
+  @moduledoc """
+  Inspect the request and determine if it is a valid request.
+  """
 
   @behaviour Web3.Middleware
 
