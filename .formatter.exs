@@ -2,6 +2,7 @@
 
 locals_without_parens = [
   dispatch: 2,
+  contract: 1,
   middleware: 1
 ]
 

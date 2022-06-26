@@ -29,17 +29,17 @@ defmodule Web3.ABI.Compiler do
   defmacro __using__(opts) do
     alias Web3.Type.{Event, Function}
 
-    abi_file = opts[:abi_file]
-    abis = parse_abi_file(abi_file)
+    abi_path = opts[:abi_path]
+    abi = parse_abi_file(abi_path)
     contract_address = opts[:contract_address]
 
     event_defs =
-      for %Event{} = event_abi <- abis do
+      for %Event{} = event_abi <- abi do
         defevent(event_abi)
       end
 
     function_defs =
-      for %Function{} = function_abi <- abis do
+      for %Function{} = function_abi <- abi do
         deffunction(function_abi, opts)
       end
 
@@ -47,8 +47,8 @@ defmodule Web3.ABI.Compiler do
       @app_id unquote(opts[:id])
       @chain_id unquote(opts[:chain_id])
       @json_rpc_args unquote(opts[:json_rpc_arguments])
-      @external_resource unquote(abi_file)
-      @abis unquote(Macro.escape(abis))
+      @external_resource unquote(abi_path)
+      @abi unquote(Macro.escape(abi))
       @contract_address unquote(contract_address)
 
       @middleware [
@@ -57,11 +57,14 @@ defmodule Web3.ABI.Compiler do
         Web3.Middleware.ResponseFormatter
       ]
 
-      def abis(), do: @abis
+      def abi(), do: @abi
       def address(), do: @contract_address
 
       Module.register_attribute(__MODULE__, :events, accumulate: true)
+
       unquote(event_defs)
+
+      def events(), do: @events |> Map.new() |> Map.values()
 
       @events_lookup Map.new(@events)
 
