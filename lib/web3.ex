@@ -19,6 +19,7 @@ defmodule Web3 do
 
       @default_middleware [
         Web3.Middleware.Parser,
+        Web3.Middleware.RequestInspector,
         Web3.Middleware.ResponseFormatter
         # Web3.Middleware.Logger
       ]
