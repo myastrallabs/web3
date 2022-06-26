@@ -23,10 +23,10 @@ defmodule Web3.MixProject do
   defp deps do
     [
       {:jason, "~> 1.3"},
-      {:ecto, "~> 3.7", options: true},
+      {:ecto, "~> 3.7", optional: true},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ex_keccak, "~> 0.4.0"},
-      {:httpoison, "~> 1.8", options: true},
+      {:httpoison, "~> 1.8", optional: true},
       {:mox, "~> 1.0", only: [:test]}
     ]
   end
