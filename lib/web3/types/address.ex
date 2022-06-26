@@ -195,6 +195,37 @@ defmodule Web3.Type.Address do
     end
   end
 
+  # @spec to_checksum(t) :: String.t()
+  # def to_checksum(address) do
+  #   # address = address |> Web3.Type.Hash.to_string()
+  #   address_hash = address |> ExKeccak.hash_256() |> Base.encode16(case: :lower)
+
+  #   keccak_hash_list =
+  #     address_hash
+  #     |> String.split("", trim: true)
+  #     |> Enum.map(fn x -> elem(Integer.parse(x, 16), 0) end)
+
+  #   list_arr =
+  #     for n <- 0..(String.length(address) - 1) do
+  #       number = Enum.at(keccak_hash_list, n)
+
+  #       cond do
+  #         number >= 8 -> String.upcase(String.at(address, n))
+  #         true -> String.downcase(String.at(address, n))
+  #       end
+  #     end
+
+  #   "0x" <> List.to_string(list_arr)
+  # end
+
+  @spec is_checksummed?(String.t()) :: boolean()
+  def is_checksummed?(original_hash) do
+    lowercase_hash = String.downcase(original_hash)
+    sha3_hash = ExKeccak.hash_256(lowercase_hash)
+
+    do_checksum_check(sha3_hash, original_hash)
+  end
+
   @spec is_hex?(String.t()) :: boolean()
   defp is_hex?(hash) do
     case Regex.run(~r|[0-9a-f]{40}|i, hash) do
@@ -214,14 +245,6 @@ defmodule Web3.Type.Address do
     else
       _ -> false
     end
-  end
-
-  @spec is_checksummed?(String.t()) :: boolean()
-  defp is_checksummed?(original_hash) do
-    lowercase_hash = String.downcase(original_hash)
-    sha3_hash = ExKeccak.hash_256(lowercase_hash)
-
-    do_checksum_check(sha3_hash, original_hash)
   end
 
   @spec do_checksum_check(binary(), String.t()) :: boolean()
