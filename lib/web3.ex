@@ -35,7 +35,14 @@ defmodule Web3 do
         {:eth_getTransactionCount, args: 2, return_fn: :hex},
         {:eth_getLogs, args: 1},
         {:eth_sendRawTransaction, args: 1},
-        {:eth_getCode, args: 2}
+        {:eth_getCode, args: 2},
+        {:net_version, return_fn: :integer},
+        {:eth_getTransactionByHash, args: 1},
+        {:eth_getUncleByBlockHashAndIndex, args: 2},
+        {:eth_getTransactionByBlockHashAndIndex, args: 2},
+        {:eth_getTransactionByBlockNumberAndIndex, args: 2},
+        {:eth_getBlockTransactionCountByHash, args: 1},
+        {:eth_getBlockTransactionCountByNumber, args: 1}
       ]
 
       @opts unquote(opts)
@@ -88,7 +95,10 @@ defmodule Web3 do
       end
 
     quote generated: true do
+      # contract
       unquote(contract_defs)
+
+      # dispatch
       unquote(dispatch_defs)
     end
   end
