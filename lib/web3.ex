@@ -1,10 +1,11 @@
 defmodule Web3 do
-  @moduledoc false
+  @moduledoc """
+  TODO [ ] add web3 moduledoc
+  """
 
   use Web3.Utils
 
-  alias Web3.Dispatcher
-  alias Web3.HTTP
+  alias Web3.{HTTP, Dispatcher}
 
   defmacro __using__(opts) do
     quote do
@@ -121,7 +122,7 @@ defmodule Web3 do
 
     quote do
       def unquote(method_name)(unquote_splicing(args)) do
-        payload = %Web3.Dispatcher.Payload{
+        payload = %Dispatcher.Payload{
           app_id: unquote(app_id),
           json_rpc_arguments: unquote(json_rpc_arguments),
           chain_id: unquote(chain_id),
