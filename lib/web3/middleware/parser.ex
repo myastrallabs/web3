@@ -80,6 +80,7 @@ defmodule Web3.Middleware.Parser do
 
   def decode_value(nil, _return_types), do: nil
   def decode_value(return_value, :raw), do: return_value
+  def decode_value(return_value, :integer), do: String.to_integer(return_value)
   def decode_value("0x" <> return_value, :hex), do: String.to_integer(return_value, 16)
   def decode_value(return_value, decoder) when is_function(decoder, 1), do: decoder.(return_value)
 

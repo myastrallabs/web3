@@ -10,7 +10,13 @@ defmodule Web3.Middleware.ResponseFormatter do
   @include_methods [
     :eth_getLogs,
     :eth_getTransactionReceipt,
-    :eth_getBlockByHash
+    :eth_getBlockByHash,
+    :eth_getTransactionByHash,
+    :eth_getUncleByBlockHashAndIndex,
+    :eth_getTransactionByBlockHashAndIndex,
+    :eth_getTransactionByBlockNumberAndIndex,
+    :eth_getBlockTransactionCountByHash,
+    :eth_getBlockTransactionCountByNumber
   ]
 
   def before_dispatch(%Pipeline{} = pipeline), do: pipeline
