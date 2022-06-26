@@ -46,7 +46,7 @@ defmodule Web3.ABI.Compiler do
     quote do
       @app_id unquote(opts[:id])
       @chain_id unquote(opts[:chain_id])
-      @json_rpc_args unquote(opts[:json_rpc_arguments])
+      @json_rpc_arguments unquote(opts[:json_rpc_arguments])
       @external_resource unquote(abi_path)
       @abi unquote(Macro.escape(abi))
       @contract_address unquote(contract_address)
@@ -105,11 +105,11 @@ defmodule Web3.ABI.Compiler do
   #   app_id = env.module |> Module.get_attribute(:app_id)
   #   abis = env.module |> Module.get_attribute(:abis)
   #   chain_id = env.module |> Module.get_attribute(:chain_id)
-  #   json_rpc_args = env.module |> Module.get_attribute(:json_rpc_args)
+  #   json_rpc_arguments = env.module |> Module.get_attribute(:json_rpc_arguments)
 
   #   opts = [
   #     middleware: middleware,
-  #     json_rpc_args: json_rpc_args,
+  #     json_rpc_arguments: json_rpc_arguments,
   #     chain_id: chain_id,
   #     app_id: app_id
   #   ]

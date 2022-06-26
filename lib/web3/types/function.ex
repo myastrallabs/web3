@@ -123,7 +123,7 @@ defmodule Web3.Type.Function do
 
         payload = %Dispatcher.Payload{
           app_id: @app_id,
-          json_rpc_args: @json_rpc_args,
+          json_rpc_arguments: @json_rpc_arguments,
           chain_id: @chain_id,
           args: [tco, block],
           method: :eth_call,

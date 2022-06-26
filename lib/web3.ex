@@ -40,11 +40,11 @@ defmodule Web3 do
       @opts unquote(opts)
       @app_id unquote(opts[:id])
       @chain_id unquote(opts[:chain_id])
-      @json_rpc_args unquote(opts[:json_rpc_arguments])
+      @json_rpc_arguments unquote(opts[:json_rpc_arguments])
 
       def id, do: @app_id
       def chain_id, do: @chain_id
-      def json_rpc_arguments, do: @json_rpc_args
+      def json_rpc_arguments, do: @json_rpc_arguments
     end
   end
 
@@ -52,9 +52,9 @@ defmodule Web3 do
     golbal_opts = env.module |> Module.get_attribute(:opts)
 
     # middleware
-    default_middleware = env.module |> Module.get_attribute(:default_middleware, [])
-    registered_middleware = env.module |> Module.get_attribute(:registered_middleware, [])
-    middleware = default_middleware ++ registered_middleware
+    default_middleware = env.module |> Module.get_attribute(:default_middleware, []) |> Enum.reverse()
+    registered_middleware = env.module |> Module.get_attribute(:registered_middleware, []) |> Enum.reverse()
+    middleware = Enum.reduce(default_middleware, registered_middleware, fn middleware, acc -> [middleware | acc] end)
 
     # methods
     default_methods = env.module |> Module.get_attribute(:default_methods, [])
@@ -102,7 +102,7 @@ defmodule Web3 do
     method_name = Keyword.get(opts, :name, method)
     return_fn = Keyword.get(opts, :return_fn, :raw)
     middleware = Keyword.get(opts, :middleware, [])
-    json_rpc_args = Keyword.get(opts, :json_rpc_args)
+    json_rpc_arguments = Keyword.get(opts, :json_rpc_arguments)
     chain_id = Keyword.get(opts, :chain_id, 0)
     app_id = Keyword.get(opts, :app_id)
 
@@ -112,7 +112,7 @@ defmodule Web3 do
       def unquote(method_name)(unquote_splicing(args)) do
         payload = %Web3.Dispatcher.Payload{
           app_id: unquote(app_id),
-          json_rpc_args: unquote(json_rpc_args),
+          json_rpc_arguments: unquote(json_rpc_arguments),
           chain_id: unquote(chain_id),
           args: unquote(args),
           method_name: unquote(method_name),
@@ -147,7 +147,8 @@ defmodule Web3 do
   end
 
   defmacro dispatch(method, opts) do
-    :ok = parse_method(method)
+    # :ok = parse_method(method)
+
     opts = parse_opts(opts, [])
 
     quote do

@@ -17,7 +17,7 @@ defmodule Web3.Middleware.Pipeline do
     :response,
     :args,
     :return_fn,
-    :json_rpc_args,
+    :json_rpc_arguments,
     assigns: %{},
     halted: false
   ]
