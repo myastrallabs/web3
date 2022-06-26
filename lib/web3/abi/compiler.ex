@@ -6,7 +6,6 @@ defmodule Web3.ABI.Compiler do
 
       defmodule SimpleContract do
         use Web3.ABI.Compiler,
-          id: :simple_contract,
           chain_id: 56,
           json_rpc_arguments: [
             url: "https://bsc-dataseed4.ninicoin.io/",
@@ -18,6 +17,7 @@ defmodule Web3.ABI.Compiler do
             ]
           ],
           contract_address: "0x0000000000000000000000000000000000000000"",
+          milddleware: []
       end
 
   """

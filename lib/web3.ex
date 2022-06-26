@@ -34,7 +34,8 @@ defmodule Web3 do
         {:eth_getBlockByNumber, args: 2},
         {:eth_getTransactionCount, args: 2, return_fn: :hex},
         {:eth_getLogs, args: 1},
-        {:eth_sendRawTransaction, args: 1}
+        {:eth_sendRawTransaction, args: 1},
+        {:eth_getCode, args: 2}
       ]
 
       @opts unquote(opts)
