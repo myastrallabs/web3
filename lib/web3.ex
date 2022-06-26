@@ -16,9 +16,11 @@ defmodule Web3 do
 
       Module.register_attribute(__MODULE__, :registered_middleware, accumulate: true)
       Module.register_attribute(__MODULE__, :registered_methods, accumulate: true)
+      Module.register_attribute(__MODULE__, :registered_contracts, accumulate: true)
 
       @default_middleware [
         Web3.Middleware.Parser,
+        Web3.Middleware.RequestInspector,
         Web3.Middleware.ResponseFormatter
         # Web3.Middleware.Logger
       ]
@@ -35,61 +37,57 @@ defmodule Web3 do
         {:eth_sendRawTransaction, args: 1}
       ]
 
+      @opts unquote(opts)
       @app_id unquote(opts[:id])
       @chain_id unquote(opts[:chain_id])
-      @json_rpc_args unquote(opts[:json_rpc_arguments])
+      @json_rpc_arguments unquote(opts[:json_rpc_arguments])
 
       def id, do: @app_id
       def chain_id, do: @chain_id
-      def json_rpc_arguments, do: @json_rpc_args
+      def json_rpc_arguments, do: @json_rpc_arguments
     end
   end
 
   defmacro __before_compile__(env) do
-    default_middleware =
-      env.module
-      |> Module.get_attribute(:default_middleware, [])
-      |> Enum.reverse()
+    global_opts = env.module |> Module.get_attribute(:opts)
 
-    registered_middleware =
-      env.module
-      |> Module.get_attribute(:registered_middleware, [])
-      |> Enum.reverse()
+    # middleware
+    default_middleware = env.module |> Module.get_attribute(:default_middleware, []) |> Enum.reverse()
+    registered_middleware = env.module |> Module.get_attribute(:registered_middleware, []) |> Enum.reverse()
+    middleware = Enum.reduce(default_middleware, registered_middleware, fn middleware, acc -> [middleware | acc] end)
 
-    middleware =
-      Enum.reduce(default_middleware, registered_middleware, fn middleware, acc ->
-        [middleware | acc]
-      end)
-
-    app_id = env.module |> Module.get_attribute(:app_id)
-    chain_id = env.module |> Module.get_attribute(:chain_id)
-    json_rpc_args = env.module |> Module.get_attribute(:json_rpc_args)
-
-    default_methods =
-      env.module
-      |> Module.get_attribute(:default_methods, [])
-      |> Enum.reverse()
-
-    registered_methods =
-      env.module
-      |> Module.get_attribute(:registered_methods, [])
-      |> Enum.reverse()
-
+    # methods
+    default_methods = env.module |> Module.get_attribute(:default_methods, [])
+    registered_methods = env.module |> Module.get_attribute(:registered_methods, [])
     methods = default_methods ++ registered_methods
+
+    # contracts
+    registered_contracts = env.module |> Module.get_attribute(:registered_contracts, [])
 
     dispatch_defs =
       for {method, opts} <- methods do
         new_opts =
-          opts
-          |> Keyword.put(:app_id, app_id)
-          |> Keyword.put(:chain_id, chain_id)
-          |> Keyword.put(:json_rpc_args, json_rpc_args)
+          global_opts
+          |> Keyword.merge(opts)
           |> Keyword.put(:middleware, middleware)
 
         defdispatch(method, new_opts)
       end
 
+    contract_defs =
+      for {contract_name, opts} <- registered_contracts do
+        contract_name = Module.concat(__CALLER__.module, contract_name)
+
+        new_opts =
+          global_opts
+          |> Keyword.merge(opts)
+          |> Keyword.put(:middleware, middleware)
+
+        defcontract(contract_name, new_opts)
+      end
+
     quote generated: true do
+      unquote(contract_defs)
       unquote(dispatch_defs)
     end
   end
@@ -104,7 +102,7 @@ defmodule Web3 do
     method_name = Keyword.get(opts, :name, method)
     return_fn = Keyword.get(opts, :return_fn, :raw)
     middleware = Keyword.get(opts, :middleware, [])
-    json_rpc_args = Keyword.get(opts, :json_rpc_args)
+    json_rpc_arguments = Keyword.get(opts, :json_rpc_arguments)
     chain_id = Keyword.get(opts, :chain_id, 0)
     app_id = Keyword.get(opts, :app_id)
 
@@ -114,7 +112,7 @@ defmodule Web3 do
       def unquote(method_name)(unquote_splicing(args)) do
         payload = %Web3.Dispatcher.Payload{
           app_id: unquote(app_id),
-          json_rpc_args: unquote(json_rpc_args),
+          json_rpc_arguments: unquote(json_rpc_arguments),
           chain_id: unquote(chain_id),
           args: unquote(args),
           method_name: unquote(method_name),
@@ -128,14 +126,29 @@ defmodule Web3 do
     end
   end
 
+  defp defcontract(contract_name, opts \\ []) do
+    quote do
+      defmodule unquote(contract_name) do
+        use Web3.ABI.Compiler, unquote(opts)
+      end
+    end
+  end
+
   defmacro middleware(middleware_module) do
     quote do
       @registered_middleware unquote(middleware_module)
     end
   end
 
+  defmacro contract(contract_name, opts) do
+    quote do
+      @registered_contracts {unquote(contract_name), unquote(opts)}
+    end
+  end
+
   defmacro dispatch(method, opts) do
-    :ok = parse_method(method)
+    # :ok = parse_method(method)
+
     opts = parse_opts(opts, [])
 
     quote do

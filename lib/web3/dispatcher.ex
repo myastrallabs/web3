@@ -19,7 +19,7 @@ defmodule Web3.Dispatcher do
       :method,
       :metadata,
       :returning,
-      :json_rpc_args,
+      :json_rpc_arguments,
       middleware: []
     ]
   end
@@ -41,9 +41,9 @@ defmodule Web3.Dispatcher do
   end
 
   defp execute(%Pipeline{} = pipeline, %Payload{} = payload) do
-    %{request: request, json_rpc_args: json_rpc_args} = pipeline
+    %{request: request, json_rpc_arguments: json_rpc_arguments} = pipeline
 
-    result = Web3.json_rpc(request, json_rpc_args)
+    result = Web3.json_rpc(request, json_rpc_arguments)
 
     # TODO [] retry if result is error
     case result do

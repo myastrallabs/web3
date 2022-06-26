@@ -16,7 +16,6 @@ defmodule Web3.Middleware.ResponseFormatter do
   def before_dispatch(%Pipeline{} = pipeline), do: pipeline
 
   def after_dispatch(%Pipeline{method: method, response: {:ok, response}} = pipeline) when method in @include_methods do
-    IO.inspect(response, label: "response")
     result = format_response(response)
 
     pipeline
