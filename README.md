@@ -1,7 +1,6 @@
 # Web3
 
-[![Build Status](https://travis-ci.org/zven21/web3.svg?branch=master)](https://travis-ci.org/zven21/web3)
-[![Coverage Status](https://coveralls.io/repos/github/zven21/web3/badge.svg)](https://coveralls.io/github/zven21/web3)
+[![Build Status](https://app.travis-ci.com/zven21/web3.svg?branch=main)](https://app.travis-ci.com/zven21/web3)
 
 A Elixir library for interacting with Ethereum, inspired by [web3.py](https://github.com/ethereum/web3.py). It’s provides a high level, user friendly JSON RPC API.
 
