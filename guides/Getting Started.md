@@ -23,10 +23,10 @@ Web3 can be installed from the package manager hex as follows.
     end
     ```
 
-4. Then you can use the following APIs()
+4. Then you can use the following APIs
 
-  - Infura Eth Method of the same name: [Eth API](./ETH%20API.md).
-  - Includes a number of convenient utility functions: [Base API](./Base%20API.md).
+    - Infura Eth Method of the same name: [Eth API](./ETH%20API.md).
+    - Includes a number of convenient utility functions: [Base API](./Base%20API.md).
 
     ```elixir
     iex> MyApp.Application.eth_blockNumber
