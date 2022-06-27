@@ -50,15 +50,11 @@ defmodule Web3 do
         http_options: [recv_timeout: 60_000, timeout: 60_000, hackney: [pool: :web3]]
       ]
 
-      config = Web3.Config.compile_config(__MODULE__, @default_config, unquote(opts))
-
-      @config config
+      @config compile_config(__MODULE__, @default_config, unquote(opts))
     end
   end
 
   defmacro __before_compile__(env) do
-    global_config = env.module |> Module.get_attribute(:config)
-
     # middleware
     default_middleware = env.module |> Module.get_attribute(:default_middleware, []) |> Enum.reverse()
     registered_middleware = env.module |> Module.get_attribute(:registered_middleware, []) |> Enum.reverse()
@@ -72,12 +68,16 @@ defmodule Web3 do
     # contracts
     registered_contracts = env.module |> Module.get_attribute(:registered_contracts, [])
 
+    global_config =
+      env.module
+      |> Module.get_attribute(:config)
+      |> Keyword.put(:middleware, middleware)
+
     dispatch_defs =
       for {method, opts} <- methods do
         new_opts =
           global_config
           |> Keyword.merge(opts)
-          |> Keyword.put(:middleware, middleware)
 
         defdispatch(method, new_opts)
       end
@@ -89,7 +89,6 @@ defmodule Web3 do
         new_opts =
           global_config
           |> Keyword.merge(opts)
-          |> Keyword.put(:middleware, middleware)
 
         defcontract(contract_name, new_opts)
       end
@@ -100,6 +99,8 @@ defmodule Web3 do
 
       # contract
       unquote(contract_defs)
+
+      def config(), do: unquote(global_config)
     end
   end
 
@@ -166,6 +167,14 @@ defmodule Web3 do
     quote do
       @registered_methods {unquote(method), unquote(opts)}
     end
+  end
+
+  def compile_config(module_name, default_config, opts) do
+    config = Application.get_env(:web3, module_name, [])
+
+    default_config
+    |> Keyword.merge(config)
+    |> Keyword.merge(opts)
   end
 
   @register_methods [

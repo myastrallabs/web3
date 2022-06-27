@@ -39,6 +39,7 @@ defmodule Web3.ABI.Compiler do
       unquote(event_defs)
 
       def events(), do: @events
+      def config(), do: @config
 
       @events_lookup Map.new(@events)
 

@@ -26,17 +26,10 @@ defmodule Web3.Middleware.MiddlewareTest do
   end
 
   defmodule Dummy do
-    use Web3,
-      id: :bsc_mainnet,
-      chain_id: 56,
-      json_rpc_arguments: [
-        url: "http://path_to_url.com",
-        http: Web3.HTTP.Mox,
-        http_options: [recv_timeout: 60_000, timeout: 60_000, hackney: [pool: :web3]]
-      ]
+    use Web3, rpc_endpoint: "http://localhost:8545"
 
-    middleware(FirstMiddleware)
-    middleware(LastMiddleware)
+    middleware FirstMiddleware
+    middleware LastMiddleware
   end
 
   test "should call middleware for each method dispatch" do
