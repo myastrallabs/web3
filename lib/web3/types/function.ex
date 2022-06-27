@@ -103,19 +103,21 @@ defmodule Web3.Type.Function do
             Keyword.merge([to: @contract_address], opts)
           )
 
-        # {:ok, pkey} = Web3.parse_privkey("")
-        # aaa = Web3.ABI.Signer.sign_transaction(result, pkey)
+        signed_txn = Web3.ABI.Signer.sign_transaction(result, @priv_key)
 
-        # payload = %Dispatcher.Payload{
-        #   app_id: @app_id,
-        #   json_rpc_arguments: @json_rpc_arguments,
-        #   chain_id: @chain_id,
-        #   args: [result],
-        #   method: :transaction_call,
-        #   middleware: @middleware
-        # }
+        payload = %Dispatcher.Payload{
+          json_rpc_arguments: [
+            http: Keyword.get(@config, :http),
+            http_options: Keyword.get(@config, :http_options, []),
+            rpc_endpoint: Keyword.get(@config, :rpc_endpoint)
+          ],
+          middleware: Keyword.get(@config, :middleware, []),
+          args: [signed_txn],
+          return_fn: :raw,
+          method: :eth_sendRawTransaction
+        }
 
-        # Dispatcher.dispatch(payload)
+        Dispatcher.dispatch(payload)
       end
     end
   end

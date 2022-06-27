@@ -109,7 +109,7 @@ defmodule Web3.ABI.Signer do
     end
   end
 
-  def make_signature(msg_to_sign, private_key) do
+  defp make_signature(msg_to_sign, private_key) do
     <<v, r::256, s::256>> =
       msg_to_sign
       |> ExKeccak.hash_256()
@@ -117,44 +117,4 @@ defmodule Web3.ABI.Signer do
 
     {r, s, v}
   end
-
-  # def wallet_message(message) do
-  #   "\x19Ethereum Signed Message:\n#{byte_size(message)}#{message}"
-  # end
-
-  # def wallet_sign(message, private_key) do
-  #   {r, s, v} =
-  #     wallet_message(message)
-  #     |> make_signature(private_key)
-
-  #   Base.encode16(<<r::256, s::256, v>>)
-  # end
-
-  # def wallet_recover_address(message, signature) do
-  #   addr =
-  #     wallet_message(message)
-  #     |> ExKeccak.keccak_256()
-  #     |> recover_pubkey(signature)
-  #     |> ExKeccak.keccak_256()
-  #     |> binary_part(12, 20)
-  #     |> Base.encode16(case: :lower)
-
-  #   "0x" <> addr
-  # end
-
-  # def recover_pubkey(message, signature) do
-  #   {r, s, v} = unpack_signature(signature)
-  #   Curvy.recover_key(<<v, r::256, s::256>>, message, hash: false)
-  #   |> Curvy.Key.to_pubkey()
-  #   |> binary_part(1, 64)
-  # end
-
-  # defp unpack_signature("0x" <> signature) do
-  #   unpack_signature(signature)
-  # end
-
-  # defp unpack_signature(signature) do
-  #   <<r::256, s::256, v>> = Base.decode16!(signature, case: :mixed)
-  #   {r, s, v}
-  # end
 end

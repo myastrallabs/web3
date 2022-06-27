@@ -12,7 +12,6 @@ defmodule Web3.ABI.Compiler do
 
     abi_path = opts[:abi_path]
     abi = parse_abi_file(abi_path)
-    contract_address = opts[:contract_address]
 
     event_defs =
       for %Event{} = event_abi <- abi do
@@ -29,7 +28,15 @@ defmodule Web3.ABI.Compiler do
 
       @external_resource unquote(abi_path)
       @abi unquote(Macro.escape(abi))
-      @contract_address unquote(contract_address)
+      @contract_address Keyword.get(@config, :contract_address)
+
+      priv_key =
+        case Web3.parse_privkey(Keyword.get(@config, :priv_key)) do
+          {:ok, priv_key} -> priv_key
+          _ -> nil
+        end
+
+      @priv_key priv_key
 
       def abi(), do: @abi
       def address(), do: @contract_address
