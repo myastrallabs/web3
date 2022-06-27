@@ -34,11 +34,11 @@ defmodule MyApp.Middleware.Logger do
 
   require Logger
   alias Web3.Middleware.Pipeline
-	import Pipeline
+  import Pipeline
 
   @doc "Before Request HTTP JSON RPC"
   def before_dispatch(%Pipeline{} = pipeline) do
-	  # Set metadata assigns here.
+    # Set metadata assigns here.
     Logger.info("MyApp before_dispatch")
     pipeline
   end
@@ -47,7 +47,7 @@ defmodule MyApp.Middleware.Logger do
   def after_dispatch(%Pipeline{} = pipeline) do
     Logger.info("MyApp after_dispatch")
     pipeline
-    end
+  end
 
   @doc "When after request HTTP JSON RPC failed"
   def after_failure(%Pipeline{} = pipeline) do
@@ -64,7 +64,7 @@ iex> MyApp.EthMainnet.eth_blockNumber
 iex> MyApp.EthMainnet.eth_getBalance("0xF4986360a6d873ea02F79eC3913be6845e0308A4", "latest")
 {:ok, 0}
 
-# Get Multi addresses balance.
+# Get multi-addresses balance.
 iex> MyApp.EthMainnet.eth_getBalance(["0xF4986360a6d873ea02F79eC3913be6845e0308A4", "0xF4986360a6d873ea02F79eC3913be6845e0308A4"], "latest")
 {:ok,
   %{
