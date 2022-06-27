@@ -25,3 +25,4 @@ web3-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 /lib/sandbox
+/.env*
