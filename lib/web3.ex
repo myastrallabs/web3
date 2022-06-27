@@ -101,6 +101,16 @@ defmodule Web3 do
       unquote(contract_defs)
 
       def config(), do: unquote(global_config)
+
+      @doc """
+      Execute Contract
+
+      TODO [ ] add contract doc
+
+      """
+      def execute_contract(requests, abi) do
+        Web3.Contract.execute(requests, abi, unquote(global_config))
+      end
     end
   end
 

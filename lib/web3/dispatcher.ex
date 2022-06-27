@@ -14,6 +14,7 @@ defmodule Web3.Dispatcher do
       :app_id,
       :chain_id,
       :method_name,
+      :request,
       :args,
       :return_fn,
       :method,

@@ -54,7 +54,6 @@ defmodule Web3.ABI.TypeEncoder do
   end
 
   @spec pack([binary()], [Web3.types()]) :: binary()
-
   def pack(encoded_inputs, input_types) do
     pack(encoded_inputs, input_types, length(encoded_inputs) * 32, <<>>, <<>>)
   end

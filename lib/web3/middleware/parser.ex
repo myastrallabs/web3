@@ -12,6 +12,8 @@ defmodule Web3.Middleware.Parser do
   alias Web3.Middleware.Pipeline
   import Pipeline
 
+  def before_dispatch(%Pipeline{method: :__skip_parser__} = pipeline), do: pipeline
+
   def before_dispatch(%Pipeline{method: method, args: [head | tail]} = pipeline) when is_list(head) do
     id_to_params = head |> id_to_params()
     request = id_to_params |> Enum.map(fn {id, item} -> %{id: id, jsonrpc: "2.0", method: method, params: [item | tail]} end)
@@ -27,6 +29,8 @@ defmodule Web3.Middleware.Parser do
     pipeline
     |> set_request(request)
   end
+
+  def after_dispatch(%Pipeline{method: :__skip_parser__} = pipeline), do: pipeline
 
   def after_dispatch(%Pipeline{assigns: %{id_to_params: id_to_params}, response: {:ok, response}, return_fn: return_fn} = pipeline) when is_list(response) do
     result = from_responses(response, id_to_params, return_fn)
@@ -44,6 +48,8 @@ defmodule Web3.Middleware.Parser do
     pipeline
     |> respond({:ok, result})
   end
+
+  def after_failure(%Pipeline{method: :__skip_parser__} = pipeline), do: pipeline
 
   def after_failure(%Pipeline{} = pipeline) do
     Logger.info("Request Failed")
@@ -89,9 +95,9 @@ defmodule Web3.Middleware.Parser do
     Web3.ABI.TypeDecoder.decode_data(data, return_types)
   end
 
-  defp unwrap([]), do: nil
-  defp unwrap({:ok, value}), do: unwrap(value)
-  defp unwrap([value]), do: value
-  defp unwrap(values) when is_list(values), do: List.to_tuple(values)
-  defp unwrap(value), do: value
+  def unwrap([]), do: nil
+  def unwrap({:ok, value}), do: unwrap(value)
+  def unwrap([value]), do: value
+  def unwrap(values) when is_list(values), do: List.to_tuple(values)
+  def unwrap(value), do: value
 end
