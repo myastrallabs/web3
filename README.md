@@ -32,6 +32,18 @@ iex> MyApp.EthMainnet.eth_blockNumber
 iex> MyApp.EthMainnet.eth_getBalance("0xF4986360a6d873ea02F79eC3913be6845e0308A4", "latest")
 {:ok, 0}
 
+# Get Multi addresses balance.
+iex> MyApp.EthMainnet.eth_getBalance(["0xF4986360a6d873ea02F79eC3913be6845e0308A4", "0xF4986360a6d873ea02F79eC3913be6845e0308A4"], "latest")
+{:ok,
+  %{
+    errors: [],
+    params_list: [
+      {"0xF4986360a6d873ea02F79eC3913be6845e0308A4", 0},
+      {"0xF4986360a6d873ea02F79eC3913be6845e0308A4", 0}
+    ]
+  }
+}
+
 # Query Contract
 iex> MyApp.EthMainnet.FirstContract.balanceOf_address_("0xF4986360a6d873ea02F79eC3913be6845e0308A4")
 {:ok, 0}
