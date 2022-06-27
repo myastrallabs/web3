@@ -179,6 +179,26 @@ defmodule Web3.Utils do
 
       # """
       # def to_checksum_address("0x" <> address), do: Web3.Type.Address.to_checksum(address)
+
+      @doc """
+      Parse privkey
+      """
+      @spec parse_privkey(String.t()) :: {:ok, binary()} | :errork
+      def parse_privkey(private_key) do
+        case private_key do
+          <<_::binary-size(32)>> ->
+            {:ok, private_key}
+
+          <<encoded_private_key::binary-size(64)>> ->
+            Base.decode16(encoded_private_key, case: :mixed)
+
+          pkey when is_integer(pkey) ->
+            {:ok, <<pkey::256>>}
+
+          _ ->
+            :error
+        end
+      end
     end
   end
 end

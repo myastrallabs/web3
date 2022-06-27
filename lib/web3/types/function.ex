@@ -84,14 +84,38 @@ defmodule Web3.Type.Function do
 
   def define_transaction_call(abi, signature, selector, abi_name, params) do
     quote generated: true do
-      @doc unquote(signature)
-      def unquote(abi_name)(unquote_splicing(params), opts) do
+      def unquote(:"inspect_#{abi_name}")(unquote_splicing(params), opts) do
         unquote(__MODULE__).tco(
           unquote(params),
           unquote(Macro.escape(abi)),
           unquote(selector),
           Keyword.merge([to: @contract_address], opts)
         )
+      end
+
+      @doc unquote(signature)
+      def unquote(abi_name)(unquote_splicing(params), opts) do
+        result =
+          unquote(__MODULE__).tco(
+            unquote(params),
+            unquote(Macro.escape(abi)),
+            unquote(selector),
+            Keyword.merge([to: @contract_address], opts)
+          )
+
+        # {:ok, pkey} = Web3.parse_privkey("")
+        # aaa = Web3.ABI.Signer.sign_transaction(result, pkey)
+
+        # payload = %Dispatcher.Payload{
+        #   app_id: @app_id,
+        #   json_rpc_arguments: @json_rpc_arguments,
+        #   chain_id: @chain_id,
+        #   args: [result],
+        #   method: :transaction_call,
+        #   middleware: @middleware
+        # }
+
+        # Dispatcher.dispatch(payload)
       end
     end
   end
@@ -150,7 +174,7 @@ defmodule Web3.Type.Function do
       |> normalize_address()
 
     Map.new(opts)
-    |> Map.take([:from, :gas, :gas_price, :gas_limit, :value, :nonce])
+    |> Map.take([:from, :gas, :gas_price, :gas_limit, :value, :nonce, :chain_id])
     |> Map.merge(%{to: to, data: data})
   end
 
