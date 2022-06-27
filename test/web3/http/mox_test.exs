@@ -12,7 +12,7 @@ defmodule Web3.HTTP.MoxTest do
     %{
       json_rpc_arguments: [
         http: Web3.HTTP.Mox,
-        url: "http://path_to_url.com",
+        rpc_endpoint: "http://path_to_url.com",
         http_options: [recv_timeout: 60_000, timeout: 60_000, hackney: [pool: :web3]]
       ]
     }
@@ -276,7 +276,7 @@ defmodule Web3.HTTP.MoxTest do
 
   defp assert_payload_too_large(payload, json_rpc_arguments) do
     http = Keyword.fetch!(json_rpc_arguments, :http)
-    url = Keyword.fetch!(json_rpc_arguments, :url)
+    url = Keyword.fetch!(json_rpc_arguments, :rpc_endpoint)
     json = Jason.encode_to_iodata!(payload)
     http_options = Keyword.fetch!(json_rpc_arguments, :http_options)
 

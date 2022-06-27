@@ -23,7 +23,6 @@ defmodule Web3 do
         Web3.Middleware.Parser,
         Web3.Middleware.RequestInspector,
         Web3.Middleware.ResponseFormatter
-        # Web3.Middleware.Logger
       ]
 
       @default_methods [
@@ -46,20 +45,16 @@ defmodule Web3 do
         {:eth_getBlockTransactionCountByNumber, args: 1}
       ]
 
-      @opts unquote(opts)
-      @app_id unquote(opts[:id])
-      @chain_id unquote(opts[:chain_id])
-      @json_rpc_arguments unquote(opts[:json_rpc_arguments])
+      @default_config [
+        http: Web3.HTTP.HTTPoison,
+        http_options: [recv_timeout: 60_000, timeout: 60_000, hackney: [pool: :web3]]
+      ]
 
-      def id, do: @app_id
-      def chain_id, do: @chain_id
-      def json_rpc_arguments, do: @json_rpc_arguments
+      @config compile_config(__MODULE__, @default_config, unquote(opts))
     end
   end
 
   defmacro __before_compile__(env) do
-    global_opts = env.module |> Module.get_attribute(:opts)
-
     # middleware
     default_middleware = env.module |> Module.get_attribute(:default_middleware, []) |> Enum.reverse()
     registered_middleware = env.module |> Module.get_attribute(:registered_middleware, []) |> Enum.reverse()
@@ -73,12 +68,16 @@ defmodule Web3 do
     # contracts
     registered_contracts = env.module |> Module.get_attribute(:registered_contracts, [])
 
+    global_config =
+      env.module
+      |> Module.get_attribute(:config)
+      |> Keyword.put(:middleware, middleware)
+
     dispatch_defs =
       for {method, opts} <- methods do
         new_opts =
-          global_opts
+          global_config
           |> Keyword.merge(opts)
-          |> Keyword.put(:middleware, middleware)
 
         defdispatch(method, new_opts)
       end
@@ -88,19 +87,20 @@ defmodule Web3 do
         contract_name = Module.concat(__CALLER__.module, contract_name)
 
         new_opts =
-          global_opts
+          global_config
           |> Keyword.merge(opts)
-          |> Keyword.put(:middleware, middleware)
 
         defcontract(contract_name, new_opts)
       end
 
     quote generated: true do
+      # dispatch
+      unquote(dispatch_defs)
+
       # contract
       unquote(contract_defs)
 
-      # dispatch
-      unquote(dispatch_defs)
+      def config(), do: unquote(global_config)
     end
   end
 
@@ -114,18 +114,19 @@ defmodule Web3 do
     method_name = Keyword.get(opts, :name, method)
     return_fn = Keyword.get(opts, :return_fn, :raw)
     middleware = Keyword.get(opts, :middleware, [])
-    json_rpc_arguments = Keyword.get(opts, :json_rpc_arguments)
-    chain_id = Keyword.get(opts, :chain_id, 0)
-    app_id = Keyword.get(opts, :app_id)
+
+    json_rpc_arguments = [
+      http: Keyword.get(opts, :http),
+      http_options: Keyword.get(opts, :http_options, []),
+      rpc_endpoint: Keyword.get(opts, :rpc_endpoint)
+    ]
 
     args = Macro.generate_arguments(arg_number, __MODULE__)
 
     quote do
       def unquote(method_name)(unquote_splicing(args)) do
         payload = %Dispatcher.Payload{
-          app_id: unquote(app_id),
           json_rpc_arguments: unquote(json_rpc_arguments),
-          chain_id: unquote(chain_id),
           args: unquote(args),
           method_name: unquote(method_name),
           method: unquote(method),
@@ -166,6 +167,14 @@ defmodule Web3 do
     quote do
       @registered_methods {unquote(method), unquote(opts)}
     end
+  end
+
+  def compile_config(module_name, default_config, opts) do
+    config = Application.get_env(:web3, module_name, [])
+
+    default_config
+    |> Keyword.merge(config)
+    |> Keyword.merge(opts)
   end
 
   @register_methods [

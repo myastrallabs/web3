@@ -7,7 +7,6 @@ defmodule Web3.ABI do
     - [ABX](https://github.com/Kabie/abx)
     - [ExABI](https://github.com/poanetwork/ex_abi)
 
-
   """
 
   require Logger
