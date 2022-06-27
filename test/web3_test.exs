@@ -7,11 +7,11 @@ defmodule Web3Test do
 
   import Mox
 
-  setup :set_mox_from_context
+  # setup :set_mox_from_context
   setup :verify_on_exit!
 
-  defmodule Dummy do
-    use Web3, rpc_endpoint: "http://localhost:8545"
+  defmodule ExampleApplication do
+    use Web3, rpc_endpoint: "http://localhost:8545", http: Web3.HTTP.Mox
   end
 
   test "eth_gasPrice/0" do
@@ -21,7 +21,7 @@ defmodule Web3Test do
       {:ok, %{body: body, status_code: 200}}
     end)
 
-    assert {:ok, 5_000_000_000} = Dummy.eth_gasPrice()
+    assert {:ok, 5_000_000_000} = ExampleApplication.eth_gasPrice()
   end
 
   test "eth_getBalance/1" do
@@ -31,7 +31,7 @@ defmodule Web3Test do
       {:ok, %{body: body, status_code: 200}}
     end)
 
-    assert {:ok, 1} = Dummy.eth_getBalance("0x0000000000000000000000000000000000000000", "latest")
+    assert {:ok, 1} = ExampleApplication.eth_getBalance("0x0000000000000000000000000000000000000000", "latest")
   end
 
   test "eth_blockNumber/0" do
@@ -40,7 +40,7 @@ defmodule Web3Test do
       {:ok, %{body: body, status_code: 200}}
     end)
 
-    assert {:ok, 1} = Dummy.eth_blockNumber()
+    assert {:ok, 1} = ExampleApplication.eth_blockNumber()
   end
 
   # describe "eth_getTransactionReceipt/1" do
@@ -51,7 +51,7 @@ defmodule Web3Test do
   #     {:ok, [%{id: 0, jsonrpc: "2.0", result: nil}]}
   #   end)
 
-  #   assert {:ok, [%{id: 0, jsonrpc: "2.0", result: nil}]} = Dummy.eth_getTransactionReceipt(hash)
+  #   assert {:ok, [%{id: 0, jsonrpc: "2.0", result: nil}]} = ExampleApplication.eth_getTransactionReceipt(hash)
   # end
 
   # test "with valid transaction hash" do
@@ -81,7 +81,7 @@ defmodule Web3Test do
   #      ]}
   #   end)
 
-  #   # assert {:ok, [_]} = Dummy.eth_getTransactionReceipt(hash)
+  #   # assert {:ok, [_]} = ExampleApplication.eth_getTransactionReceipt(hash)
   # end
   # end
 
@@ -104,7 +104,7 @@ defmodule Web3Test do
   #       {:ok, %{body: body, status_code: 200}}
   #     end)
 
-  #     Web3.Dummy.eth_getLogs(%{address: ["0x0000000000000000000000000000000000000000"], fromBlock: Web3.to_hex(1), toBlock: Web3.to_hex(10)})
+  #     ExampleApplication.eth_getLogs(%{address: ["0x0000000000000000000000000000000000000000"], fromBlock: Web3.to_hex(1), toBlock: Web3.to_hex(10)})
   #   end
 
   #   test "filter with topic" do

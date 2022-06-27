@@ -31,7 +31,6 @@ defmodule Web3.HTTP do
     json = encode_json(request)
     http = Keyword.fetch!(options, :http)
     url = Keyword.fetch!(options, :rpc_endpoint)
-
     http_options = Keyword.fetch!(options, :http_options)
 
     with {:ok, %{body: body, status_code: code}} <- http.json_rpc(url, json, http_options),
@@ -125,7 +124,7 @@ defmodule Web3.HTTP do
 
         _ ->
           raise """
-            Failed to decode Ethereum JSONRPC response:
+            Failed to decode JSONRPC response:
 
             request:
 

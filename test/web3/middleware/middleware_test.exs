@@ -25,8 +25,8 @@ defmodule Web3.Middleware.MiddlewareTest do
     def after_failure(pipeline), do: pipeline
   end
 
-  defmodule Dummy do
-    use Web3, rpc_endpoint: "http://localhost:8545"
+  defmodule ExampleApplication do
+    use Web3, rpc_endpoint: "http://localhost:8545", http: Web3.HTTP.Mox
 
     middleware FirstMiddleware
     middleware LastMiddleware
@@ -40,6 +40,6 @@ defmodule Web3.Middleware.MiddlewareTest do
       {:ok, %{body: body, status_code: 200}}
     end)
 
-    assert 2 = Dummy.eth_getBalance("0x0000000000000000000000000000000000000000", "latest")
+    assert 2 = ExampleApplication.eth_getBalance("0x0000000000000000000000000000000000000000", "latest")
   end
 end
