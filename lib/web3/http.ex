@@ -30,7 +30,7 @@ defmodule Web3.HTTP do
   def json_rpc(%{method: _method} = request, options) when is_map(request) do
     json = encode_json(request)
     http = Keyword.fetch!(options, :http)
-    url = Keyword.fetch!(options, :url)
+    url = Keyword.fetch!(options, :rpc_endpoint)
     http_options = Keyword.fetch!(options, :http_options)
 
     with {:ok, %{body: body, status_code: code}} <- http.json_rpc(url, json, http_options),
@@ -61,7 +61,7 @@ defmodule Web3.HTTP do
 
   defp chunked_json_rpc([[%{method: _method} | _] = batch | tail] = chunks, options, decoded_response_bodies) when is_list(tail) and is_list(decoded_response_bodies) do
     http = Keyword.fetch!(options, :http)
-    url = Keyword.fetch!(options, :url)
+    url = Keyword.fetch!(options, :rpc_endpoint)
     http_options = Keyword.fetch!(options, :http_options)
 
     json = encode_json(batch)
@@ -124,7 +124,7 @@ defmodule Web3.HTTP do
 
         _ ->
           raise """
-            Failed to decode Ethereum JSONRPC response:
+            Failed to decode JSONRPC response:
 
             request:
 
