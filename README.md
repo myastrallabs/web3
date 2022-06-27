@@ -17,11 +17,43 @@ defmodule MyApp.EthMainnet do
   use Web3, rpc_endpoint: "https://mainnet.infura.io/v3/<YOUR_KEY>"
 
   # middleware (optional)
-  middleware MyAapp.Middleware.Logger
+  middleware MyApp.Middleware.Logger
+
   # dispatch (optional)
   dispatch :eth_getBalance, args: 2
+
   # contract (optinnal)
   contract :FirstContract, contract_address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", abi_path: "path_to_abi.json"
+end
+
+# (Optional) If you need to customise your middleware.
+defmodule MyApp.Middleware.Logger do
+  @moduledoc false
+
+  @behaviour Web3.Middleware
+
+  require Logger
+  alias Web3.Middleware.Pipeline
+	import Pipeline
+
+  @doc "Before Request HTTP JSON RPC"
+  def before_dispatch(%Pipeline{} = pipeline) do
+	  # Set metadata assigns here.
+    Logger.info("MyApp before_dispatch")
+    pipeline
+  end
+
+  @doc "After Request HTTP JSON RPC"
+  def after_dispatch(%Pipeline{} = pipeline) do
+    Logger.info("MyApp after_dispatch")
+    pipeline
+    end
+
+  @doc "When after request HTTP JSON RPC failed"
+  def after_failure(%Pipeline{} = pipeline) do
+    Logger.info("MyApp after_failure")
+    pipeline
+  end
 end
 
 # Get latest block number
