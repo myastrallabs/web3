@@ -62,8 +62,8 @@ defmodule Web3.Contract do
     Enum.map(requests_with_index, fn {%{method_name: method_name, args: _args}, index} ->
       indexed_responses[index]
       |> case do
-        nil ->
-          {:error, "No result"}
+        %{error: error} ->
+          {index, {:error, error}}
 
         response ->
           function = define_function(functions, method_name)
