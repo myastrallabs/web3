@@ -7,7 +7,7 @@ defmodule Web3.Contract do
 
   alias Web3.Dispatcher
 
-  @spec execute(Keyword.t, Keyword.t(), Keyword.t()) :: {:ok, [{:ok, any()}, {:error, any()}]}
+  @spec execute(Keyword.t(), Keyword.t(), Keyword.t()) :: {:ok, [{:ok, any()}, {:error, any()}]}
   def execute(requests, abi, options) do
     parsed_abi =
       abi
