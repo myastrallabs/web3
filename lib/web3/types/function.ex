@@ -122,13 +122,15 @@ defmodule Web3.Type.Function do
           )
 
         payload = %Dispatcher.Payload{
-          app_id: @app_id,
-          json_rpc_arguments: @json_rpc_arguments,
-          chain_id: @chain_id,
+          json_rpc_arguments: [
+            http: Keyword.get(@config, :http),
+            http_options: Keyword.get(@config, :http_options, []),
+            rpc_endpoint: Keyword.get(@config, :rpc_endpoint)
+          ],
+          middleware: Keyword.get(@config, :middleware, []),
           args: [tco, block],
           method: :eth_call,
-          return_fn: unquote(Macro.escape(return_types)),
-          middleware: @middleware
+          return_fn: unquote(Macro.escape(return_types))
         }
 
         Dispatcher.dispatch(payload)

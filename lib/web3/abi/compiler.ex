@@ -1,25 +1,6 @@
 defmodule Web3.ABI.Compiler do
   @moduledoc """
   Compile for ABI json file
-
-  ## Example of ABI Compiler
-
-      defmodule SimpleContract do
-        use Web3.ABI.Compiler,
-          chain_id: 56,
-          json_rpc_arguments: [
-            url: "https://bsc-dataseed4.ninicoin.io/",
-            http: Web3.HTTP.HTTPoison,
-            http_options: [
-              recv_timeout: :timer.minutes(1),
-              timeout: :timer.minutes(1),
-              hackney: [pool: :web3]
-            ]
-          ],
-          contract_address: "0x0000000000000000000000000000000000000000"",
-          milddleware: []
-      end
-
   """
 
   require Logger
@@ -44,10 +25,7 @@ defmodule Web3.ABI.Compiler do
       end
 
     quote do
-      @app_id unquote(opts[:id])
-      @chain_id unquote(opts[:chain_id])
-      @json_rpc_arguments unquote(opts[:json_rpc_arguments])
-      @middleware unquote(opts[:middleware])
+      @config unquote(opts)
 
       @external_resource unquote(abi_path)
       @abi unquote(Macro.escape(abi))

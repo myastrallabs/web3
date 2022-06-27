@@ -8,8 +8,7 @@ defmodule Web3.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Web3.Worker.start_link(arg)
-      # {Web3.Worker, arg}
+      # Web3.Config.Store
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
