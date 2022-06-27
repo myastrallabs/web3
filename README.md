@@ -12,16 +12,16 @@ Provides support for:
 ## Example
 
 ```elixir
+# Defining the component
 defmodule MyApp.EthMainnet do
-	use Web3, rpc_endpoint: "https://mainnet.infura.io/v3/<YOUR_KEY>"
+  use Web3, rpc_endpoint: "https://mainnet.infura.io/v3/<YOUR_KEY>"
 
-	# middleware (optional)
-	middleware MyAapp.Middleware.Logger
-	# dispatch (optional)
-	dispatch :eth_getBalance, args: 2
-	# contract (optinnal)
-	contract :FirstContract, contract_address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", abi_path: "path_to_abi.json"
-
+  # middleware (optional)
+  middleware MyAapp.Middleware.Logger
+  # dispatch (optional)
+  dispatch :eth_getBalance, args: 2
+  # contract (optinnal)
+  contract :FirstContract, contract_address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", abi_path: "path_to_abi.json"
 end
 
 # Get latest block number
@@ -38,12 +38,12 @@ iex> MyApp.EthMainnet.FirstContract.balanceOf_address_("0xF4986360a6d873ea02F79e
 
 # Make Transaction
 iex> MyApp.EthMainnet.FirstContract.approve_address_uint256_(
-	"0x0000000000000000000000000000000000000000", 
-	10, 
-	gas_price: 12_000_000_000, 
-	gas_limit: 300_000, 
-	chain_id: 1, 
-	nonce: 1
+  "0x0000000000000000000000000000000000000000", 
+  10, 
+  gas_price: 12_000_000_000, 
+  gas_limit: 300_000, 
+  chain_id: 1, 
+  nonce: 1
 )
 
 {:ok, true}
