@@ -1,5 +1,7 @@
 ## ETH API
 
+### Built-in Methods
+
 Web3 has the following methods built in: 
 
 - eth_blockNumber/0
@@ -21,6 +23,8 @@ Web3 has the following methods built in:
 
 You can get details at [Infura.io](https://docs.infura.io/infura/networks/ethereum/json-rpc-methods/eth_gasprice)
 
+### Customised Method
+
 By the way, you can define the eth API.
 
 ```elixir
@@ -41,3 +45,31 @@ Macro dispatch receives 2 parameters.
   `name`      | `false`  | Alias name | (empty)
   `args`      | `false`  | Number of parameters received by the method |  0
   `return_fn` | `false`  | Return value types, you can use anonymous functions | :raw
+  
+  
+### Configuration
+
+Two ways to define variables
+
+```elixir
+defmodule MyApp.MyApplication do
+  use Web3, rpc_endpoint: "<PATH>"
+end
+```
+Or:
+
+```elixir
+config :web3, 
+  rpc_endpoint: "<PATH>"
+```
+#### Variable:
+
+  Field       | Required|  Description          | Default
+  ----------- | --------| --------------------- | -------------
+  `rpc_endpoint`      | `true`  | RPC Endpoint URL | 
+  `http`      | `false`  | HTTP Request |  `Web3.HTTP.HTTPoison`
+  `http_options` | `false`  | HTTP Request Options | `[recv_timeout: 60_000, timeout: 60_000]`
+  `priv_key` | `false`  | Private key, if you want to send a transaction | 
+  `chain_id` | `false`  | Chain Id, visit [chainlist](https://chainlist.org/) | 
+  `gas_limit` | `false`  | Gas Limit | 
+  `gas_price` | `false`  | Gas Price | 
