@@ -2,17 +2,12 @@
 
 [![Build Status](https://app.travis-ci.com/zven21/web3.svg?branch=main)](https://app.travis-ci.com/zven21/web3)
 
-A Elixir library for interacting with Ethereum, inspired by [web3.py](https://github.com/ethereum/web3.py). It’s a high level, user-friendly ethereum client.
-
-Provides support for:
-
-- Multiple chain HTTP RPC API
-- Dynamic && Compiled SmartContract call and transaction
+A Elixir library for interacting with Ethereum, inspired by [web3.py](https://github.com/ethereum/web3.py). It’s a high level, user-friendly Ethereum JSON-RPC Client.
 
 ## Example
 
 ```elixir
-# Defining the component
+# Defining the application
 defmodule MyApp.EthMainnet do
   use Web3, rpc_endpoint: "<PATH_TO_RPC_ENDPOINT>"
 
@@ -102,11 +97,20 @@ iex> MyApp.EthMainnet.FirstContract.approve_address_uint256_(
 - [Variables](guides/Variables.md)
 - [Base API](guides/Base%20API.md)
 - [Examples](guides/Examples.md)
+- [Features](#Features)
 - [Used in production?](#used-in-production)
 
 ## **Used in production?**
 
 Web3 is under development and is not recommended for use in production environments
+
+## **Features**
+
+- [x] Ethereum JSON-RPC Client
+- [ ] Interacting smart contracts
+- [ ] Querying past events
+- [ ] Event monitoring as Streams
+- [ ] Websockets
 
 ## **Contributing**
 
