@@ -75,7 +75,8 @@ end
 defmodule MyApp.Application do
   use Web3, rpc_endpoint: "<RPC_ENDPOINT_PATH>"
   
-  use :FirstContract, contract_address: "", abi_path: "<PATH_TO_ABI_FILE>"
+  # macro
+  contract :FirstContract, contract_address: "", abi_path: "<PATH_TO_ABI_JSON_FILE>"
 end
 
 iex> MyApp.Application.balanceOf_address_("0xF4986360a6d873ea02F79eC3913be6845e0308A4")
