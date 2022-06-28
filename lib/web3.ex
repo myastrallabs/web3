@@ -11,6 +11,8 @@ defmodule Web3 do
     quote do
       require Logger
 
+      use Web3.Utils
+
       import unquote(__MODULE__)
 
       @before_compile unquote(__MODULE__)

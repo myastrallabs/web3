@@ -6,7 +6,7 @@ Web3 can be installed from the package manager hex as follows.
 
     ```elixir
     def deps do
-      [{:web3, "~> 0.1.0"}]
+      [{:web3, "~> 0.1.1"}]
     end
     ```
 2. Fetch mix dependencies:
@@ -19,7 +19,7 @@ Web3 can be installed from the package manager hex as follows.
 
     ```elixir
     defmodule MyApp.Application do
-      use web3, rpc_endpoint: "https://mainnet.infura.io/v3/<YOUR_KEY>"
+      use web3, rpc_endpoint: "<PATH_TO_RPC_ENDPOINT>"
     end
     ```
 

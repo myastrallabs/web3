@@ -14,7 +14,7 @@ Provides support for:
 ```elixir
 # Defining the component
 defmodule MyApp.EthMainnet do
-  use Web3, rpc_endpoint: "https://mainnet.infura.io/v3/<YOUR_KEY>"
+  use Web3, rpc_endpoint: "<PATH_TO_RPC_ENDPOINT>"
 
   # middleware (optional)
   middleware MyApp.Middleware.Logger
