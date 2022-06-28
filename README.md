@@ -2,7 +2,7 @@
 
 [![Build Status](https://app.travis-ci.com/zven21/web3.svg?branch=main)](https://app.travis-ci.com/zven21/web3)
 
-A Elixir library for interacting with Ethereum, inspired by [web3.py](https://github.com/ethereum/web3.py). It’s provides a high level, user friendly JSON RPC API.
+A Elixir library for interacting with Ethereum, inspired by [web3.py](https://github.com/ethereum/web3.py). It’s a high level, user-friendly ethereum client.
 
 Provides support for:
 
@@ -93,18 +93,18 @@ iex> MyApp.EthMainnet.FirstContract.approve_address_uint256_(
 {:ok, true}
 ```
 
-## Overview
+## **Overview**
 
 - [Getting started](guides/Getting%20Started.md)
 - [ETH API](guides/ETH%20API.md)
-- [Base API](guides/Base%20API.md)
 - [SmartContract](guides/SmartContract.md)
 - [Middleware](guides/Middleware.md)
 - [Variables](guides/Variables.md)
+- [Base API](guides/Base%20API.md)
 - [Examples](guides/Examples.md)
 - [Used in production?](#used-in-production)
 
-## Used in production?
+## **Used in production?**
 
 Web3 is under development and is not recommended for use in production environments
 
