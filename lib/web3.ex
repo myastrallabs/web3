@@ -86,13 +86,21 @@ defmodule Web3 do
 
     contract_defs =
       for {contract_name, opts} <- registered_contracts do
-        contract_name = Module.concat(__CALLER__.module, contract_name)
+        # support top-level module nameing
+        is_top_module? = contract_name |> Atom.to_string() |> String.split(".") |> hd() |> Kernel.===("Elixir")
+
+        module_name =
+          if is_top_module? do
+            contract_name
+          else
+            Module.concat(__CALLER__.module, contract_name)
+          end
 
         new_opts =
           global_config
           |> Keyword.merge(opts)
 
-        defcontract(contract_name, new_opts)
+        defcontract(module_name, new_opts)
       end
 
     quote generated: true do
@@ -103,6 +111,8 @@ defmodule Web3 do
       unquote(contract_defs)
 
       def config(), do: unquote(global_config)
+      # contracts
+      def contracts(), do: unquote(registered_contracts)
 
       @doc """
       Execute Contract
@@ -152,6 +162,8 @@ defmodule Web3 do
   end
 
   defp defcontract(contract_name, opts \\ []) do
+    IO.inspect(contract_name, label: "contract_name")
+
     quote do
       defmodule unquote(contract_name) do
         use Web3.ABI.Compiler, unquote(opts)
