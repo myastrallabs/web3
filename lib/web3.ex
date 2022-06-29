@@ -162,8 +162,6 @@ defmodule Web3 do
   end
 
   defp defcontract(contract_name, opts \\ []) do
-    IO.inspect(contract_name, label: "contract_name")
-
     quote do
       defmodule unquote(contract_name) do
         use Web3.ABI.Compiler, unquote(opts)
