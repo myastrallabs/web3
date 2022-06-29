@@ -11,6 +11,7 @@ defmodule Web3.Middleware.ResponseFormatter do
     :eth_getLogs,
     :eth_getTransactionReceipt,
     :eth_getBlockByHash,
+    :eth_getBlockByNumber,
     :eth_getTransactionByHash,
     :eth_getUncleByBlockHashAndIndex,
     :eth_getTransactionByBlockHashAndIndex,
@@ -40,7 +41,26 @@ defmodule Web3.Middleware.ResponseFormatter do
 
   defp do_format_response({key, _} = entry) when key in ~w(address blockHash data removed topics transactionHash type)a, do: entry
 
-  defp do_format_response({key, quantity}) when key in ~w(number difficulty blockNumber logIndex transactionIndex transactionLogIndex gas gasPrice nonce gasLimit gasUsed cumulativeGasUsed status)a do
+  @integer_fields ~w(
+    number
+    difficulty
+    blockNumber
+    logIndex
+    transactionIndex
+    transactionLogIndex
+    gas
+    gasPrice
+    nonce
+    gasLimit
+    gasUsed
+    cumulativeGasUsed
+    status
+    timestamp
+    totalDifficulty
+    size
+  )a
+
+  defp do_format_response({key, quantity}) when key in @integer_fields do
     if is_nil(quantity) do
       {key, nil}
     else
