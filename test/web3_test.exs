@@ -96,5 +96,14 @@ defmodule Web3Test do
                Web3.Middleware.ResponseFormatter
              ] = FirstApplication.middleware()
     end
+
+    test "get user custom middleware" do
+      assert [
+               Web3.Middleware.Parser,
+               Web3.Middleware.RequestInspector,
+               Web3.Middleware.ResponseFormatter,
+               Web3.Middleware.Logger
+             ] = SecondApplication.middleware()
+    end
   end
 end
