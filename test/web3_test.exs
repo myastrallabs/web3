@@ -5,110 +5,96 @@ defmodule Web3Test do
 
   doctest Web3
 
-  import Mox
-
-  # setup :set_mox_from_context
-  setup :verify_on_exit!
-
-  defmodule ExampleApplication do
+  defmodule FirstApplication do
     use Web3, rpc_endpoint: "http://localhost:8545", http: Web3.HTTP.Mox
   end
 
-  test "eth_gasPrice/0" do
-    expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
-      body = %{jsonrpc: "2.0", id: 1, result: Web3.to_hex(5_000_000_000)} |> Jason.encode!()
+  defmodule SecondApplication do
+    use Web3, rpc_endpoint: "http://localhost:8545", http: Web3.HTTP.Mox
 
-      {:ok, %{body: body, status_code: 200}}
-    end)
+    dispatch :eth_getBalance, args: 2, name: :eth_getBalance_2
 
-    assert {:ok, 5_000_000_000} = ExampleApplication.eth_gasPrice()
+    middleware Web3.Middleware.Logger
+
+    contract :FirstContract, contract_address: "0xe9e7cea3dedca5984780bafc599bd69add087d56", abi_path: Path.join([__DIR__, "./support/fixtures/BUSD.abi.json"])
   end
 
-  test "eth_getBalance/1" do
-    expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
-      body = %{jsonrpc: "2.0", id: 1, result: Web3.to_hex(1)} |> Jason.encode!()
-
-      {:ok, %{body: body, status_code: 200}}
-    end)
-
-    assert {:ok, 1} = ExampleApplication.eth_getBalance("0x0000000000000000000000000000000000000000", "latest")
+  describe "application config()" do
+    test "get application default config/0" do
+      assert [
+               middleware: [Web3.Middleware.Parser, Web3.Middleware.RequestInspector, Web3.Middleware.ResponseFormatter],
+               http_options: [recv_timeout: 60000, timeout: 60000, hackney: [pool: :web3]],
+               rpc_endpoint: "http://localhost:8545",
+               http: Web3.HTTP.Mox
+             ] = FirstApplication.config()
+    end
   end
 
-  test "eth_blockNumber/0" do
-    expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
-      body = %{jsonrpc: "2.0", id: 1, result: Web3.to_hex(1)} |> Jason.encode!()
-      {:ok, %{body: body, status_code: 200}}
-    end)
-
-    assert {:ok, 1} = ExampleApplication.eth_blockNumber()
+  describe "application contracts" do
+    test "get application custom middleware" do
+      assert [
+               FirstContract: [
+                 contract_address: "0xe9e7cea3dedca5984780bafc599bd69add087d56",
+                 abi_path: "/Users/zven/damo/web3/test/./support/fixtures/BUSD.abi.json"
+               ]
+             ] = SecondApplication.contracts()
+    end
   end
 
-  # describe "eth_getTransactionReceipt/1" do
-  # test "with invalid transaction hash" do
-  #   hash = "0x0000000000000000000000000000000000000000000000000000000000000000"
+  describe "application methods" do
+    test "get application default method" do
+      assert [
+               eth_blockNumber: [return_fn: :int],
+               eth_getBalance: [args: 2, return_fn: :int],
+               eth_gasPrice: [return_fn: :int],
+               eth_getTransactionReceipt: [args: 1],
+               eth_getBlockByHash: [args: 2],
+               eth_getBlockByNumber: [args: 2],
+               eth_getTransactionCount: [args: 2, return_fn: :int],
+               eth_getLogs: [args: 1],
+               eth_sendRawTransaction: [args: 1],
+               eth_getCode: [args: 2],
+               net_version: [return_fn: :integer],
+               eth_getTransactionByHash: [args: 1],
+               eth_getUncleByBlockHashAndIndex: [args: 2],
+               eth_getTransactionByBlockHashAndIndex: [args: 2],
+               eth_getTransactionByBlockNumberAndIndex: [args: 2],
+               eth_getBlockTransactionCountByHash: [args: 1],
+               eth_getBlockTransactionCountByNumber: [args: 1]
+             ] = FirstApplication.methods()
+    end
 
-  #   expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
-  #     {:ok, [%{id: 0, jsonrpc: "2.0", result: nil}]}
-  #   end)
+    test "get default with custom method" do
+      assert [
+               eth_blockNumber: [return_fn: :int],
+               eth_getBalance: [args: 2, return_fn: :int],
+               eth_gasPrice: [return_fn: :int],
+               eth_getTransactionReceipt: [args: 1],
+               eth_getBlockByHash: [args: 2],
+               eth_getBlockByNumber: [args: 2],
+               eth_getTransactionCount: [args: 2, return_fn: :int],
+               eth_getLogs: [args: 1],
+               eth_sendRawTransaction: [args: 1],
+               eth_getCode: [args: 2],
+               net_version: [return_fn: :integer],
+               eth_getTransactionByHash: [args: 1],
+               eth_getUncleByBlockHashAndIndex: [args: 2],
+               eth_getTransactionByBlockHashAndIndex: [args: 2],
+               eth_getTransactionByBlockNumberAndIndex: [args: 2],
+               eth_getBlockTransactionCountByHash: [args: 1],
+               eth_getBlockTransactionCountByNumber: [args: 1],
+               eth_getBalance: [name: :eth_getBalance_2, args: 2]
+             ] = SecondApplication.methods()
+    end
+  end
 
-  #   assert {:ok, [%{id: 0, jsonrpc: "2.0", result: nil}]} = ExampleApplication.eth_getTransactionReceipt(hash)
-  # end
-
-  # test "with valid transaction hash" do
-  #   hash = "0xa2e81bb56b55ba3dab2daf76501b50dfaad240cccb905dbf89d65c7a84a4a48e"
-
-  #   expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
-  #     {:ok,
-  #      [
-  #        %{
-  #          id: 0,
-  #          jsonrpc: "2.0",
-  #          result: %{
-  #            "blockHash" => "0x29c850324e357f3c0c836d79860c5af55f7b651e5d7ee253c1af1b14908af49c",
-  #            "blockNumber" => "0x414911",
-  #            "contractAddress" => nil,
-  #            "cumulativeGasUsed" => "0x5208",
-  #            "gasUsed" => "0x5208",
-  #            "logs" => [],
-  #            "logsBloom" =>
-  #              "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  #            "root" => nil,
-  #            "status" => "0x1",
-  #            "transactionHash" => hash,
-  #            "transactionIndex" => "0x0"
-  #          }
-  #        }
-  #      ]}
-  #   end)
-
-  #   # assert {:ok, [_]} = ExampleApplication.eth_getTransactionReceipt(hash)
-  # end
-  # end
-
-  # test "eth_getBlockByHash/2" do
-  #   assert true
-  # end
-
-  # test "eth_getBlockByNumber/2" do
-  #   assert true
-  # end
-
-  # test "eth_getTransactionCount/2" do
-  #   assert true
-  # end
-
-  # describe "eth_getLogs/1" do
-  #   test "filter with address" do
-  #     expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
-  #       body = %{jsonrpc: "2.0", id: 1, result: []} |> Jason.encode!()
-  #       {:ok, %{body: body, status_code: 200}}
-  #     end)
-
-  #     ExampleApplication.eth_getLogs(%{address: ["0x0000000000000000000000000000000000000000"], fromBlock: Web3.to_hex(1), toBlock: Web3.to_hex(10)})
-  #   end
-
-  #   test "filter with topic" do
-  #     assert true
-  #   end
-  # end
+  describe "middleware/0" do
+    test "get application default middleware" do
+      assert [
+               Web3.Middleware.Parser,
+               Web3.Middleware.RequestInspector,
+               Web3.Middleware.ResponseFormatter
+             ] = FirstApplication.middleware()
+    end
+  end
 end
