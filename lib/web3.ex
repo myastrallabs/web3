@@ -1,6 +1,12 @@
 defmodule Web3 do
   @moduledoc """
-  TODO [ ] add web3 moduledoc
+  Web3 is high level, user-friendly Ethereum JSON-RPC Client.
+
+  ## Provides:
+
+    - Multi Chain Ethereum JSON-RPC Client
+    - Interacting smart contracts
+
   """
 
   use Web3.Utils
@@ -10,8 +16,6 @@ defmodule Web3 do
   defmacro __using__(opts) do
     quote do
       require Logger
-
-      use Web3.Utils
 
       import unquote(__MODULE__)
 
@@ -43,8 +47,8 @@ defmodule Web3 do
         {:eth_getUncleByBlockHashAndIndex, args: 2},
         {:eth_getTransactionByBlockHashAndIndex, args: 2},
         {:eth_getTransactionByBlockNumberAndIndex, args: 2},
-        {:eth_getBlockTransactionCountByHash, args: 1},
-        {:eth_getBlockTransactionCountByNumber, args: 1}
+        {:eth_getBlockTransactionCountByHash, args: 1, return_fn: :hex},
+        {:eth_getBlockTransactionCountByNumber, args: 1, return_fn: :hex}
       ]
 
       @default_config [

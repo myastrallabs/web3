@@ -107,7 +107,7 @@ Web3 is under development and is not recommended for use in production environme
 ## **Features**
 
 - [x] Ethereum JSON-RPC Client
-- [ ] Interacting smart contracts
+- [x] Interacting smart contracts
 - [ ] Querying past events
 - [ ] Event monitoring as Streams
 - [ ] Websockets

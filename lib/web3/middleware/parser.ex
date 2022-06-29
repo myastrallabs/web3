@@ -14,16 +14,20 @@ defmodule Web3.Middleware.Parser do
 
   def before_dispatch(%Pipeline{method: :__skip_parser__} = pipeline), do: pipeline
 
-  def before_dispatch(%Pipeline{method: method, args: [head | tail]} = pipeline) when is_list(head) do
-    id_to_params = head |> id_to_params()
-    request = id_to_params |> Enum.map(fn {id, item} -> %{id: id, jsonrpc: "2.0", method: method, params: [item | tail]} end)
+  def before_dispatch(%Pipeline{method: _method, args: [head | _tail] = args} = pipeline) when is_list(head) do
+    args
+    |> parse_args([])
+    |> do_before_dispatch(pipeline)
+  end
 
-    pipeline
-    |> assign(:id_to_params, id_to_params)
-    |> set_request(request)
+  def before_dispatch(%Pipeline{args: [_from.._to = _head | _tail] = args} = pipeline) do
+    args
+    |> parse_args([])
+    |> do_before_dispatch(pipeline)
   end
 
   def before_dispatch(%Pipeline{method: method, args: args} = pipeline) do
+    args = parse_args(args, [])
     request = %{id: 1, jsonrpc: "2.0", method: method, params: args}
 
     pipeline
@@ -56,14 +60,55 @@ defmodule Web3.Middleware.Parser do
     pipeline
   end
 
+  def do_before_dispatch([head | tail], %Pipeline{method: method} = pipeline) when is_list(head) do
+    id_to_params = head |> id_to_params()
+    request = id_to_params |> Enum.map(fn {id, item} -> %{id: id, jsonrpc: "2.0", method: method, params: [item | tail]} end)
+
+    pipeline
+    |> assign(:id_to_params, id_to_params)
+    |> set_request(request)
+  end
+
+  def parse_args([head | tail] = _args, result) do
+    parse_result = do_parse_args(head)
+    parse_args(tail, [parse_result | result])
+  end
+
+  def parse_args([], result), do: Enum.reverse(result)
+
+  # parse eth_getLogs
+  defp do_parse_args(%{fromBlock: from_block, toBlock: to_block} = entry) do
+    entry
+    |> Map.put(:fromBlock, Web3.to_hex(from_block))
+    |> Map.put(:toBlock, Web3.to_hex(to_block))
+  end
+
+  defp do_parse_args(entry) when is_binary(entry), do: entry
+  defp do_parse_args(entry) when is_integer(entry), do: Web3.to_hex(entry)
+  defp do_parse_args(entry) when is_list(entry), do: Enum.map(entry, &Web3.to_hex/1)
+
+  defp do_parse_args(_from.._to = entry) do
+    {from, to} = Enum.min_max(entry)
+
+    from..to
+    |> Enum.to_list()
+    |> Enum.map(&Web3.to_hex/1)
+  end
+
+  defp do_parse_args(entry), do: entry
+
   defp from_responses(responses, id_to_params, return_fn) do
     responses
     |> Enum.map(&from_response(&1, id_to_params, return_fn))
     |> Enum.reduce(
-      %{params_list: [], errors: []},
+      %{result: [], params_list: [], errors: []},
       fn
-        {:ok, params}, %{params_list: params_list} = acc ->
-          %{acc | params_list: [params | params_list]}
+        {:ok, {param, decode_data}}, %{result: result, params_list: params_list} = acc ->
+          %{
+            acc
+            | params_list: [param | params_list],
+              result: [decode_data | result]
+          }
 
         {:error, reason}, %{errors: errors} = acc ->
           %{acc | errors: [reason | errors]}
@@ -98,6 +143,6 @@ defmodule Web3.Middleware.Parser do
   def unwrap([]), do: nil
   def unwrap({:ok, value}), do: unwrap(value)
   def unwrap([value]), do: value
-  def unwrap(values) when is_list(values), do: List.to_tuple(values)
+  # def unwrap(values) when is_list(values), do: List.to_tuple(values)
   def unwrap(value), do: value
 end
