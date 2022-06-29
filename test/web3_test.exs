@@ -32,12 +32,7 @@ defmodule Web3Test do
 
   describe "application contracts" do
     test "get application custom middleware" do
-      assert [
-               FirstContract: [
-                 contract_address: "0xe9e7cea3dedca5984780bafc599bd69add087d56",
-                 abi_path: "/Users/zven/damo/web3/test/./support/fixtures/BUSD.abi.json"
-               ]
-             ] = SecondApplication.contracts()
+      assert [FirstContract: _] = SecondApplication.contracts()
     end
   end
 
