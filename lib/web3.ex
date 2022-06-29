@@ -47,8 +47,8 @@ defmodule Web3 do
         {:eth_getUncleByBlockHashAndIndex, args: 2},
         {:eth_getTransactionByBlockHashAndIndex, args: 2},
         {:eth_getTransactionByBlockNumberAndIndex, args: 2},
-        {:eth_getBlockTransactionCountByHash, args: 1, return_fn: :hex},
-        {:eth_getBlockTransactionCountByNumber, args: 1, return_fn: :hex}
+        {:eth_getBlockTransactionCountByHash, args: 1, return_fn: :int},
+        {:eth_getBlockTransactionCountByNumber, args: 1, return_fn: :int}
       ]
 
       @default_config [
