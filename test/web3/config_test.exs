@@ -6,7 +6,7 @@ defmodule Web3.ConfigTest do
   defmodule ExampleApplication do
     use Web3, rpc_endpoint: "http://localhost:8545"
 
-    contract FirstContract, contract_address: "0x0000000000000000000000000000000000000000", abi_path: Path.join([__DIR__, "../support/fixtures/BUSD.abi.json"])
+    contract :FirstContract, contract_address: "0x0000000000000000000000000000000000000000", abi_path: Path.join([__DIR__, "../support/fixtures/BUSD.abi.json"])
   end
 
   defmodule Example2Application do
@@ -26,7 +26,7 @@ defmodule Web3.ConfigTest do
       http_options: [],
       chain_id: 97
 
-    contract FirstContract, contract_address: "0x0000000000000000000000000000000000000000", abi_path: Path.join([__DIR__, "../support/fixtures/BUSD.abi.json"])
+    contract :FirstContract, contract_address: "0x0000000000000000000000000000000000000000", abi_path: Path.join([__DIR__, "../support/fixtures/BUSD.abi.json"])
   end
 
   describe "A Application Config" do
