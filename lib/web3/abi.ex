@@ -17,6 +17,15 @@ defmodule Web3.ABI do
   @doc false
   def unhex("0x" <> hex), do: Base.decode16!(hex, case: :mixed)
 
+  def parse_type(%{type: "tuple", components: inner_types}) do
+    {:tuple, inner_types |> Enum.map(&parse_type/1)}
+  end
+
+  def parse_type(%{type: type}) do
+    {:ok, [t], "", _, _, _} = Web3.ABI.TypeParser.parse(type)
+    t
+  end
+
   basic_types =
     [:address, :bool, :string, :bytes]
     |> Enum.map(&{to_string(&1), &1})
@@ -37,41 +46,6 @@ defmodule Web3.ABI do
     end
 
   all_types = basic_types ++ int_types ++ uint_types ++ bytes_types
-
-  # all_type_definitions =
-  #   all_types
-  #   |> Keyword.values()
-  #   |> Enum.reduce(fn type, acc ->
-  #     quote do
-  #       unquote(type) | unquote(acc)
-  #     end
-  #   end)
-
-  # @type types() :: unquote(all_type_definitions)
-
-  def parse_type(%{type: "tuple", components: inner_types}) do
-    {:tuple, inner_types |> Enum.map(&parse_type/1)}
-  end
-
-  for {name, type} <- all_types do
-    def parse_type(%{type: unquote(name)}) do
-      unquote(type)
-    end
-  end
-
-  def parse_type(%{type: type_name} = type_def) do
-    case Regex.run(~r/(.*)\[(\d*)\]/, type_name) do
-      [_, inner_type, ""] ->
-        {:array, parse_type(%{type_def | type: inner_type})}
-
-      [_, inner_type, n] ->
-        {:array, parse_type(%{type_def | type: inner_type}), String.to_integer(n)}
-
-      _ ->
-        Logger.warn("Unsupported type name: #{type_name}")
-        String.to_atom(type_name)
-    end
-  end
 
   for {name, type} <- all_types do
     def type_name(unquote(type)) do
