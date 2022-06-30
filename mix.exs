@@ -9,7 +9,7 @@ defmodule Web3.MixProject do
       app: :web3,
       version: @version,
       description: "A Elixir library for interacting with Ethereum",
-      elixir: "~> 1.13",
+      elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
