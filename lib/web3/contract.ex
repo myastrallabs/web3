@@ -7,7 +7,9 @@ defmodule Web3.Contract do
 
   alias Web3.Dispatcher
 
-  @spec execute(Keyword.t(), Keyword.t(), Keyword.t()) :: {:ok, [{:ok, any()}, {:error, any()}]}
+  @spec execute(Map.t() | Keyword.t(), Keyword.t(), Keyword.t()) :: {:ok, [{:ok, any()}, {:error, any()}]}
+  def execute(request, abi, options) when is_map(request), do: execute([request], abi, options)
+
   def execute(requests, abi, options) do
     parsed_abi =
       abi
@@ -20,7 +22,9 @@ defmodule Web3.Contract do
 
     indexed_responses =
       requests_with_index
-      |> Enum.map(fn {%{contract_address: contract_address, method_name: method_name, args: args} = request, index} ->
+      |> Enum.map(fn {%{contract_address: contract_address, method_name: method_name} = request, index} ->
+        args = Map.get(request, :args, [])
+
         function = define_function(functions, method_name)
 
         func_selector =
@@ -59,7 +63,7 @@ defmodule Web3.Contract do
       end
       |> Enum.into(%{}, &{&1.id, &1})
 
-    Enum.map(requests_with_index, fn {%{method_name: method_name, args: _args}, index} ->
+    Enum.map(requests_with_index, fn {%{method_name: method_name}, index} ->
       indexed_responses[index]
       |> case do
         %{error: error} ->
@@ -112,7 +116,7 @@ defmodule Web3.Contract do
       |> Web3.Middleware.Parser.decode_value(return_types)
       |> Web3.Middleware.Parser.unwrap()
 
-    {id, {:ok, decoded_data}}
+    {id, decoded_data}
   rescue
     MatchError ->
       {id, {:error, :invalid_data}}
