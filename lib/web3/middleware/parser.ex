@@ -101,12 +101,12 @@ defmodule Web3.Middleware.Parser do
     responses
     |> Enum.map(&from_response(&1, id_to_params, return_fn))
     |> Enum.reduce(
-      %{result: [], params_list: [], errors: []},
+      %{result: [], params: [], errors: []},
       fn
-        {:ok, {param, decode_data}}, %{result: result, params_list: params_list} = acc ->
+        {:ok, {param, decode_data}}, %{result: result, params: params} = acc ->
           %{
             acc
-            | params_list: [param | params_list],
+            | params: [param | params],
               result: [decode_data | result]
           }
 
@@ -123,16 +123,15 @@ defmodule Web3.Middleware.Parser do
     {:ok, {param, decode_data}}
   end
 
-  defp id_to_params(params_list) do
-    params_list
+  defp id_to_params(params) do
+    params
     |> Stream.with_index()
     |> Enum.into(%{}, fn {params, id} -> {id, params} end)
   end
 
   def decode_value(nil, _return_types), do: nil
   def decode_value(return_value, :raw), do: return_value
-  def decode_value(return_value, :integer), do: String.to_integer(return_value)
-  def decode_value("0x" <> return_value, :hex), do: String.to_integer(return_value, 16)
+  def decode_value(return_value, :int), do: Web3.to_integer(return_value)
   def decode_value(return_value, decoder) when is_function(decoder, 1), do: decoder.(return_value)
 
   def decode_value("0x" <> return_value, return_types) do

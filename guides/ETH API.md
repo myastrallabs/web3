@@ -59,8 +59,7 @@ end
 Or:
 
 ```elixir
-config :web3, 
-  rpc_endpoint: "<PATH>"
+config :web3, rpc_endpoint: "<PATH>"
 ```
 #### Variable:
 

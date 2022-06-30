@@ -32,13 +32,13 @@ defmodule Web3 do
       ]
 
       @default_methods [
-        {:eth_blockNumber, return_fn: :hex},
-        {:eth_getBalance, args: 2, return_fn: :hex},
-        {:eth_gasPrice, return_fn: :hex},
+        {:eth_blockNumber, return_fn: :int},
+        {:eth_getBalance, args: 2, return_fn: :int},
+        {:eth_gasPrice, return_fn: :int},
         {:eth_getTransactionReceipt, args: 1},
         {:eth_getBlockByHash, args: 2},
         {:eth_getBlockByNumber, args: 2},
-        {:eth_getTransactionCount, args: 2, return_fn: :hex},
+        {:eth_getTransactionCount, args: 2, return_fn: :int},
         {:eth_getLogs, args: 1},
         {:eth_sendRawTransaction, args: 1},
         {:eth_getCode, args: 2},
@@ -47,8 +47,8 @@ defmodule Web3 do
         {:eth_getUncleByBlockHashAndIndex, args: 2},
         {:eth_getTransactionByBlockHashAndIndex, args: 2},
         {:eth_getTransactionByBlockNumberAndIndex, args: 2},
-        {:eth_getBlockTransactionCountByHash, args: 1, return_fn: :hex},
-        {:eth_getBlockTransactionCountByNumber, args: 1, return_fn: :hex}
+        {:eth_getBlockTransactionCountByHash, args: 1, return_fn: :int},
+        {:eth_getBlockTransactionCountByNumber, args: 1, return_fn: :int}
       ]
 
       @default_config [
@@ -90,13 +90,21 @@ defmodule Web3 do
 
     contract_defs =
       for {contract_name, opts} <- registered_contracts do
-        contract_name = Module.concat(__CALLER__.module, contract_name)
+        # support top-level module nameing
+        is_top_module? = contract_name |> Atom.to_string() |> String.split(".") |> hd() |> Kernel.===("Elixir")
+
+        module_name =
+          if is_top_module? do
+            contract_name
+          else
+            Module.concat(__CALLER__.module, contract_name)
+          end
 
         new_opts =
           global_config
           |> Keyword.merge(opts)
 
-        defcontract(contract_name, new_opts)
+        defcontract(module_name, new_opts)
       end
 
     quote generated: true do
@@ -107,6 +115,13 @@ defmodule Web3 do
       unquote(contract_defs)
 
       def config(), do: unquote(global_config)
+      # contracts
+      def contracts(), do: unquote(registered_contracts)
+      # methods
+      def methods(), do: unquote(methods)
+
+      # middleware
+      def middleware(), do: unquote(middleware)
 
       @doc """
       Execute Contract

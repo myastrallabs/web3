@@ -64,10 +64,8 @@ iex> MyApp.EthMainnet.eth_getBalance(["0xF4986360a6d873ea02F79eC3913be6845e0308A
 {:ok,
   %{
     errors: [],
-    params_list: [
-      {"0xF4986360a6d873ea02F79eC3913be6845e0308A4", 0},
-      {"0xF4986360a6d873ea02F79eC3913be6845e0308A4", 0}
-    ]
+    params: ["0xF4986360a6d873ea02F79eC3913be6845e0308A4", "0xF4986360a6d873ea02F79eC3913be6845e0308A4"],
+    result: [0, 0]
   }
 }
 
