@@ -6,6 +6,7 @@ defmodule Web3.ContractTest do
   doctest Web3.ABI
 
   import Mox
+
   setup :verify_on_exit!
 
   defmodule FirstApplication do
@@ -44,7 +45,7 @@ defmodule Web3.ContractTest do
   ]
 
   describe "ERC20 Contract" do
-    test "request with simple method" do
+    test "request with empty args" do
       expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
         body =
           %{
@@ -110,6 +111,30 @@ defmodule Web3.ContractTest do
     ]
 
     assert [ok: 3_010_313_572_023_648_563_905] = FirstApplication.execute_contract(requests, @erc20_abi)
+  end
+
+  test "request not exist method" do
+    expect(Web3.HTTP.Mox, :json_rpc, fn _url, _json, _options ->
+      body =
+        %{
+          id: 0,
+          jsonrpc: "2.0",
+          error: %{code: -32000, message: "execution reverted"}
+        }
+        |> Jason.encode!()
+
+      {:ok, %{body: body, status_code: 200}}
+    end)
+
+    requests = [
+      %{
+        args: ["0x0000000000000000000000000000000000000000"],
+        method_name: :balanceOf,
+        contract_address: "0x0000000000000000000000000000000000000000"
+      }
+    ]
+
+    assert [error: %{code: -32000, message: "execution reverted"}] = FirstApplication.execute_contract(requests, @erc20_abi)
   end
 
   test "multi requests" do

@@ -67,7 +67,7 @@ defmodule Web3.Contract do
       indexed_responses[index]
       |> case do
         %{error: error} ->
-          {index, {:error, error}}
+          {:error, error}
 
         response ->
           function = define_function(functions, method_name)
