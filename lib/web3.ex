@@ -27,7 +27,7 @@ defmodule Web3 do
 
       @default_middleware [
         Web3.Middleware.Parser,
-        Web3.Middleware.RequestInspector,
+        # Web3.Middleware.RequestInspector,
         Web3.Middleware.ResponseFormatter
       ]
 
@@ -110,7 +110,6 @@ defmodule Web3 do
     quote generated: true do
       # dispatch
       unquote(dispatch_defs)
-
       # contract
       unquote(contract_defs)
 
@@ -119,15 +118,11 @@ defmodule Web3 do
       def contracts(), do: unquote(registered_contracts)
       # methods
       def methods(), do: unquote(methods)
-
       # middleware
       def middleware(), do: unquote(middleware)
 
       @doc """
       Execute Contract
-
-      TODO [ ] add contract doc
-
       """
       def execute_contract(requests, abi) do
         Web3.Contract.execute(requests, abi, unquote(global_config))

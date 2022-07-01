@@ -32,7 +32,7 @@ defmodule Web3.ConfigTest do
   describe "A Application Config" do
     test "should get application config with @default_config" do
       assert [
-               {:middleware, [Web3.Middleware.Parser, Web3.Middleware.RequestInspector, Web3.Middleware.ResponseFormatter]},
+               {:middleware, [Web3.Middleware.Parser, Web3.Middleware.ResponseFormatter]},
                {:http, Web3.HTTP.HTTPoison},
                {:http_options, [recv_timeout: 60000, timeout: 60000, hackney: [pool: :web3]]},
                {:rpc_endpoint, "http://localhost:8545"}
@@ -41,7 +41,7 @@ defmodule Web3.ConfigTest do
 
     test "should get application config with http && http_options" do
       assert [
-               {:middleware, [Web3.Middleware.Parser, Web3.Middleware.RequestInspector, Web3.Middleware.ResponseFormatter]},
+               {:middleware, [Web3.Middleware.Parser, Web3.Middleware.ResponseFormatter]},
                {:rpc_endpoint, "http://localhost:8545"},
                {:http, Web3.HTTP.Finch},
                {:http_options, []}
@@ -50,7 +50,7 @@ defmodule Web3.ConfigTest do
 
     test "should get application with config :web3" do
       assert [
-               {:middleware, [Web3.Middleware.Parser, Web3.Middleware.RequestInspector, Web3.Middleware.ResponseFormatter]},
+               {:middleware, [Web3.Middleware.Parser, Web3.Middleware.ResponseFormatter]},
                {:rpc_endpoint, "http://localhost:8545"},
                {:http, Web3.HTTP.Finch},
                {:http_options, []},
