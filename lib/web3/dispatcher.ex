@@ -46,7 +46,6 @@ defmodule Web3.Dispatcher do
 
     result = Web3.json_rpc(request, json_rpc_arguments)
 
-    # TODO [] retry if result is error
     case result do
       {:ok, response} ->
         pipeline
