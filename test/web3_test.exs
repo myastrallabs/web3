@@ -22,7 +22,7 @@ defmodule Web3Test do
   describe "application config()" do
     test "get application default config/0" do
       assert [
-               middleware: [Web3.Middleware.Parser, Web3.Middleware.RequestInspector, Web3.Middleware.ResponseFormatter],
+               middleware: [Web3.Middleware.Parser, Web3.Middleware.ResponseFormatter],
                http_options: [recv_timeout: 60000, timeout: 60000, hackney: [pool: :web3]],
                rpc_endpoint: "http://localhost:8545",
                http: Web3.HTTP.Mox
@@ -87,7 +87,6 @@ defmodule Web3Test do
     test "get application default middleware" do
       assert [
                Web3.Middleware.Parser,
-               Web3.Middleware.RequestInspector,
                Web3.Middleware.ResponseFormatter
              ] = FirstApplication.middleware()
     end
@@ -95,7 +94,6 @@ defmodule Web3Test do
     test "get user custom middleware" do
       assert [
                Web3.Middleware.Parser,
-               Web3.Middleware.RequestInspector,
                Web3.Middleware.ResponseFormatter,
                Web3.Middleware.Logger
              ] = SecondApplication.middleware()

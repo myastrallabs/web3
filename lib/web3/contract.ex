@@ -73,7 +73,7 @@ defmodule Web3.Contract do
           function = define_function(functions, method_name)
           {^index, result} = decode_result(response, function)
 
-          {index, result}
+          result
       end
     end)
   rescue
@@ -116,7 +116,7 @@ defmodule Web3.Contract do
       |> Web3.Middleware.Parser.decode_value(return_types)
       |> Web3.Middleware.Parser.unwrap()
 
-    {id, decoded_data}
+    {id, {:ok, decoded_data}}
   rescue
     MatchError ->
       {id, {:error, :invalid_data}}

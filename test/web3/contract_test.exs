@@ -59,7 +59,7 @@ defmodule Web3.ContractTest do
       end)
 
       request = %{contract_address: "0xe9e7cea3dedca5984780bafc599bd69add087d56", method_name: :name}
-      assert [{0, "BUSD Token"}] = FirstApplication.execute_contract(request, @erc20_abi)
+      assert [ok: "BUSD Token"] = FirstApplication.execute_contract(request, @erc20_abi)
     end
 
     test "request method_name eq :name" do
@@ -84,7 +84,7 @@ defmodule Web3.ContractTest do
         }
       ]
 
-      assert [{0, "BUSD Token"}] = FirstApplication.execute_contract(requests, @erc20_abi)
+      assert [ok: "BUSD Token"] = FirstApplication.execute_contract(requests, @erc20_abi)
     end
   end
 
@@ -109,7 +109,7 @@ defmodule Web3.ContractTest do
       }
     ]
 
-    assert [{0, 3_010_313_572_023_648_563_905}] = FirstApplication.execute_contract(requests, @erc20_abi)
+    assert [ok: 3_010_313_572_023_648_563_905] = FirstApplication.execute_contract(requests, @erc20_abi)
   end
 
   test "multi requests" do
@@ -146,6 +146,6 @@ defmodule Web3.ContractTest do
       }
     ]
 
-    assert [{0, "BUSD Token"}, {1, 3_010_313_572_023_648_563_905}] = FirstApplication.execute_contract(requests, @erc20_abi)
+    assert [ok: "BUSD Token", ok: 3_010_313_572_023_648_563_905] = FirstApplication.execute_contract(requests, @erc20_abi)
   end
 end
