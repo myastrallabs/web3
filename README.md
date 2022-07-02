@@ -8,11 +8,11 @@ A Elixir library for interacting with Ethereum, inspired by [web3.py](https://g
 
 ```elixir
 # Defining the application
-defmodule MyApp.EthMainnet do
+defmodule MyApp.Application do
   use Web3, rpc_endpoint: "<PATH_TO_RPC_ENDPOINT>"
 
   # middleware (optional)
-  middleware MyApp.Middleware.Logger
+  # middleware MyApp.Middleware.Logger
 
   # dispatch (optional)
   dispatch :eth_getBalance, args: 2
@@ -21,46 +21,16 @@ defmodule MyApp.EthMainnet do
   contract :FirstContract, contract_address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", abi_path: "path_to_abi.json"
 end
 
-# (Optional) If you need to customise your middleware.
-defmodule MyApp.Middleware.Logger do
-  @moduledoc false
-
-  @behaviour Web3.Middleware
-
-  require Logger
-  alias Web3.Middleware.Pipeline
-  import Pipeline
-
-  @doc "Before Request HTTP JSON RPC"
-  def before_dispatch(%Pipeline{} = pipeline) do
-    # Set metadata assigns here.
-    Logger.info("MyApp before_dispatch")
-    pipeline
-  end
-
-  @doc "After Request HTTP JSON RPC"
-  def after_dispatch(%Pipeline{} = pipeline) do
-    Logger.info("MyApp after_dispatch")
-    pipeline
-  end
-
-  @doc "When after request HTTP JSON RPC failed"
-  def after_failure(%Pipeline{} = pipeline) do
-    Logger.info("MyApp after_failure")
-    pipeline
-  end
-end
-
 # Get latest block number
-iex> MyApp.EthMainnet.eth_blockNumber
+iex> MyApp.Application.eth_blockNumber
 {:ok, 15034908}
 
 # Get address balance.
-iex> MyApp.EthMainnet.eth_getBalance("0xF4986360a6d873ea02F79eC3913be6845e0308A4", "latest")
+iex> MyApp.Application.eth_getBalance("0xF4986360a6d873ea02F79eC3913be6845e0308A4", "latest")
 {:ok, 0}
 
 # Get multi-addresses balance.
-iex> MyApp.EthMainnet.eth_getBalance(["0xF4986360a6d873ea02F79eC3913be6845e0308A4", "0xF4986360a6d873ea02F79eC3913be6845e0308A4"], "latest")
+iex> MyApp.Application.eth_getBalance(["0xF4986360a6d873ea02F79eC3913be6845e0308A4", "0xF4986360a6d873ea02F79eC3913be6845e0308A4"], "latest")
 {:ok,
   %{
     errors: [],
@@ -70,17 +40,18 @@ iex> MyApp.EthMainnet.eth_getBalance(["0xF4986360a6d873ea02F79eC3913be6845e0308A
 }
 
 # Query Contract
-iex> MyApp.EthMainnet.FirstContract.balanceOf_address_("0xF4986360a6d873ea02F79eC3913be6845e0308A4")
+iex> MyApp.Application.FirstContract.balanceOf_address_("0xF4986360a6d873ea02F79eC3913be6845e0308A4")
 {:ok, 0}
 
 # Make Transaction
-iex> MyApp.EthMainnet.FirstContract.approve_address_uint256_(
+iex> MyApp.Application.FirstContract.approve_address_uint256_(
   "0x0000000000000000000000000000000000000000", 
   10, 
   gas_price: 12_000_000_000, 
   gas_limit: 300_000, 
   chain_id: 1, 
-  nonce: 1
+  nonce: 1,
+  priv_key: "xxxxxxxxxxxxxxxxxxxxxxx"
 )
 
 {:ok, true}
@@ -92,15 +63,9 @@ iex> MyApp.EthMainnet.FirstContract.approve_address_uint256_(
 - [ETH API](guides/ETH%20API.md)
 - [SmartContract](guides/SmartContract.md)
 - [Middleware](guides/Middleware.md)
-- [Variables](guides/Variables.md)
 - [Base API](guides/Base%20API.md)
-- [Examples](guides/Examples.md)
 - [Features](#Features)
 - [Used in production?](#used-in-production)
-
-## **Used in production?**
-
-Web3 is under development and is not recommended for use in production environments
 
 ## **Features**
 
@@ -109,6 +74,10 @@ Web3 is under development and is not recommended for use in production environme
 - [ ] Querying past events
 - [ ] Event monitoring as Streams
 - [ ] Websockets
+
+## **Used in production?**
+
+Although Web3 is still in development, we will ensure that each release is stable. 
 
 ## **Contributing**
 
