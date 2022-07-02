@@ -21,15 +21,15 @@ defmodule NoOpMiddleware do
 	
   def before_dispatch(%Pipeline{method: method} = pipeline) do
     pipeline
-	end
+  end
 	
-	def after_dispatch(%Pipeline{method: method} = pipeline) do
-	  pipeline
-	end
+  def after_dispatch(%Pipeline{method: method} = pipeline) do
+    pipeline
+  end
 	
-	def after_failure(%Pipeline{method: method} = pipeline) do
-	  pipeline
-	end
+  def after_failure(%Pipeline{method: method} = pipeline) do
+    pipeline
+  end
 end
 ```
  Import the `Web3.Middleware.Pipeline` module to access convenience

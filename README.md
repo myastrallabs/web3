@@ -77,7 +77,7 @@ iex> MyApp.Application.FirstContract.approve_address_uint256_(
 
 ## **Used in production?**
 
-Web3 is under development and is not recommended for use in production environments
+Although Web3 is still in development, we will ensure that each release is stable. 
 
 ## **Contributing**
 
