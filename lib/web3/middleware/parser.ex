@@ -129,6 +129,7 @@ defmodule Web3.Middleware.Parser do
     |> Enum.into(%{}, fn {params, id} -> {id, params} end)
   end
 
+  def decode_value({:error, _} = return_value, _return_types), do: return_value
   def decode_value(nil, _return_types), do: nil
   def decode_value(return_value, :raw), do: return_value
   def decode_value(return_value, :int), do: Web3.to_integer(return_value)
