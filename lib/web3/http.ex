@@ -122,22 +122,9 @@ defmodule Web3.HTTP do
 
           {:error, {:bad_gateway, request_url}}
 
-        _ ->
-          raise """
-            Failed to decode JSONRPC response:
-
-            request:
-
-              url:
-
-              body:
-
-            response:
-
-              status code:
-
-              body:
-          """
+        code ->
+          Logger.error("Failed to decode JSON response body: #{response_body}")
+          {:error, {code, response_body}}
       end
     end
   end
