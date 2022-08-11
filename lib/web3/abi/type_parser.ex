@@ -1,4 +1,6 @@
 defmodule Web3.ABI.TypeParser do
+  @moduledoc false
+
   import NimbleParsec
 
   defp array_reduce(list) do

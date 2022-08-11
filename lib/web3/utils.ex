@@ -183,7 +183,7 @@ defmodule Web3.Utils do
       @doc """
       Parse privkey
       """
-      @spec parse_privkey(String.t()) :: {:ok, binary()} | :errork
+      @spec parse_privkey(String.t()) :: {:ok, binary()} | :error
       def parse_privkey(private_key) do
         case private_key do
           <<_::binary-size(32)>> ->
@@ -199,6 +199,11 @@ defmodule Web3.Utils do
             :error
         end
       end
+
+      @doc """
+      Just for test.
+      """
+      def ping, do: "pong"
     end
   end
 end

@@ -137,7 +137,7 @@ defmodule Web3.Middleware.Parser do
 
   def decode_value("0x" <> return_value, return_types) do
     {:ok, data} = Base.decode16(return_value, case: :mixed)
-    Web3.ABI.TypeDecoder.decode_data(data, return_types)
+    Web3.ABI.decode(data, return_types)
   end
 
   def unwrap([]), do: nil

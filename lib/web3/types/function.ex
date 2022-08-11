@@ -30,7 +30,7 @@ defmodule Web3.Type.Function do
   end
 
   def input_type({_, type}) do
-    Web3.ABI.type_name(type)
+    Web3.ABI.Types.name(type)
   end
 
   def define_func_call(%__MODULE__{} = abi) do
@@ -103,7 +103,16 @@ defmodule Web3.Type.Function do
             Keyword.merge([to: @contract_address], opts)
           )
 
-        signed_txn = Web3.ABI.Signer.sign_transaction(result, @priv_key)
+        priv_key =
+          with value when not is_nil(value) <- Keyword.get(opts, :priv_key, @priv_key),
+               {:ok, priv_key} <- Web3.parse_privkey(value) do
+            priv_key
+          else
+            nil -> raise "No private key provided"
+            :error -> raise "Invalid private key"
+          end
+
+        signed_txn = Web3.ABI.Signer.sign_transaction(result, priv_key)
 
         payload = %Dispatcher.Payload{
           json_rpc_arguments: [
@@ -125,7 +134,7 @@ defmodule Web3.Type.Function do
   def define_immutable_call(abi, signature, selector, abi_name, params, return_types) do
     return_type_string =
       return_types
-      |> Enum.map(&Web3.ABI.type_name/1)
+      |> Enum.map(&Web3.ABI.Types.name/1)
       |> Enum.join(",")
 
     doc = """
@@ -168,7 +177,8 @@ defmodule Web3.Type.Function do
     input_types = Enum.map(function.inputs, &elem(&1, 1))
 
     params_data =
-      encode_inputs(inputs, input_types)
+      inputs
+      |> Web3.ABI.encode(input_types)
       |> Base.encode16(case: :lower)
 
     data = selector <> params_data
@@ -180,15 +190,6 @@ defmodule Web3.Type.Function do
     Map.new(opts)
     |> Map.take([:from, :gas, :gas_price, :gas_limit, :value, :nonce, :chain_id])
     |> Map.merge(%{to: to, data: data})
-  end
-
-  def encode_inputs(inputs, input_types) do
-    encoded_inputs =
-      for {value, type} <- Enum.zip(inputs, input_types) do
-        Web3.ABI.TypeEncoder.encode(value, type)
-      end
-
-    Web3.ABI.TypeEncoder.pack(encoded_inputs, input_types)
   end
 
   def cast_inputs(inputs, types) do

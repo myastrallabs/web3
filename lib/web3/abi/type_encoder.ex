@@ -2,21 +2,25 @@ defmodule Web3.ABI.TypeEncoder do
   @moduledoc false
 
   require Logger
+  import Web3.ABI.Types
 
-  @spec encode(term(), Web3.types()) :: binary()
-  def encode(value, type)
+  @spec encode_type(term(), Web3.ABI.Types.types()) :: binary()
+  def encode_type(value, type)
 
-  def encode(address, :address) do
+  def encode_type(address, :address) do
     {:ok, %{bytes: bytes}} = Web3.Type.Address.cast(address)
     <<0::96, bytes::bytes()>>
   end
 
-  def encode(integer, {:uint, bits}) when is_integer(integer) do
+  def encode_type(true, :bool), do: <<1::256>>
+  def encode_type(false, :bool), do: <<0::256>>
+
+  def encode_type(integer, {:uint, bits}) when is_integer(integer) do
     padding = 256 - bits
     <<0::size(padding), integer::size(bits)>>
   end
 
-  def encode(integer, {:int, bits}) when is_integer(integer) do
+  def encode_type(integer, {:int, bits}) when is_integer(integer) do
     padding = 256 - bits
 
     if integer >= 0 do
@@ -26,56 +30,94 @@ defmodule Web3.ABI.TypeEncoder do
     end
   end
 
-  def encode(list, {:array, inner_type}) when is_list(list) do
-    data =
+  def encode_type(bytes_n, {:bytes, n}) when is_binary(bytes_n) and n in 1..32 and byte_size(bytes_n) == n do
+    padding = 32 - n
+    <<bytes_n::bytes(), 0::padding*8>>
+  end
+
+  def encode_type("0x" <> bytes_n, {:bytes, n}) when is_binary(bytes_n) and n in 1..32 and byte_size(bytes_n) == n * 2 do
+    case Base.decode16(bytes_n, case: :mixed) do
+      {:ok, bytes} ->
+        padding = 32 - n
+        <<bytes::bytes(), 0::padding*8>>
+
+      _ ->
+        :error
+    end
+  end
+
+  def encode_type(binary, type) when type in [:bytes, :string] and is_binary(binary) do
+    len = byte_size(binary)
+    pad_len = calc_padding(len)
+    encode_type(len, {:uint, 256}) <> binary <> <<0::pad_len*8>>
+  end
+
+  def encode_type(string, :string) when is_binary(string) do
+    len = byte_size(string)
+    pad_len = calc_padding(len)
+    encode_type(len, {:uint, 256}) <> string <> <<0::pad_len*8>>
+  end
+
+  def encode_type(list, {:array, inner_type}) when is_list(list) do
+    len = length(list)
+    data = encode(list, List.duplicate(inner_type, len))
+    encode_type(len, {:uint, 256}) <> data
+  end
+
+  def encode_type(list, {:array, inner_type, n}) when is_list(list) and length(list) == n do
+    if dynamic_type?(inner_type) do
+      encode(list, List.duplicate(inner_type, n))
+    else
       for value <- list, into: <<>> do
-        encode(value, inner_type)
+        encode_type(value, inner_type)
       end
-
-    encode(length(list), {:uint, 256}) <> data
-  end
-
-  def encode(list, {:array, inner_type, n}) when is_list(list) and length(list) == n do
-    for value <- list, into: <<>> do
-      encode(value, inner_type)
     end
   end
 
-  def encode(tuple, {:tuple, inner_types}) when is_tuple(tuple) and is_list(inner_types) and tuple_size(tuple) == length(inner_types) do
-    for {value, inner_type} <- tuple |> Tuple.to_list() |> Enum.zip(inner_types), into: <<>> do
-      encode(value, inner_type)
-    end
+  def encode_type(tuple, {:tuple, inner_types}) when is_tuple(tuple) and is_list(inner_types) and tuple_size(tuple) == length(inner_types) do
+    encode(Tuple.to_list(tuple), inner_types)
+  end
+
+  def encode_type(tuple, {:tuple, inner_types}) when length(tuple) == length(inner_types) do
+    encode(tuple, inner_types)
   end
 
   # TODO: more types
-  def encode(value, type) do
+  def encode_type(value, type) do
     Logger.error("Unsupported type #{inspect(type)}: #{inspect(value)}")
     <<0::256>>
   end
 
-  @spec pack([binary()], [Web3.types()]) :: binary()
-  def pack(encoded_inputs, input_types) do
-    pack(encoded_inputs, input_types, length(encoded_inputs) * 32, <<>>, <<>>)
+  @spec encode([term()], [ABX.types()]) :: binary()
+  def encode(values, types) when length(values) == length(types) do
+    tail_offset =
+      types
+      |> Enum.map(&head_size/1)
+      |> Enum.sum()
+
+    {head, tail} =
+      Enum.zip(values, types)
+      |> Enum.reduce({"", ""}, fn {value, type}, {head, tail} ->
+        encoded = encode_type(value, type)
+
+        if dynamic_type?(type) do
+          offset = encode_type(tail_offset + byte_size(tail), {:uint, 256})
+          {head <> offset, tail <> encoded}
+        else
+          {head <> encoded, tail}
+        end
+      end)
+
+    head <> tail
   end
 
-  defp pack([], [], _base_offset, inplace_data, data) do
-    inplace_data <> data
-  end
+  defp calc_padding(n) do
+    remaining = rem(n, 32)
 
-  defp pack([encoded | encoded_inputs], [{:array, _} | input_types], base_offset, inplace_data, data) do
-    offset = encode(base_offset + byte_size(data), {:uint, 256})
-    pack(encoded_inputs, input_types, base_offset, inplace_data <> offset, data <> encoded)
+    if remaining == 0 do
+      0
+    else
+      32 - remaining
+    end
   end
-
-  defp pack([encoded | encoded_inputs], [type | input_types], base_offset, inplace_data, data) do
-    pack(encoded_inputs, input_types, base_offset + type_size(type) - 32, inplace_data <> encoded, data)
-  end
-
-  defp type_size({:tuple, inner_types}) do
-    inner_types
-    |> Enum.map(&type_size/1)
-    |> Enum.sum()
-  end
-
-  defp type_size(_), do: 32
 end
