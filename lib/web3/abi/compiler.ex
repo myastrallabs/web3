@@ -29,14 +29,7 @@ defmodule Web3.ABI.Compiler do
       @external_resource unquote(abi_path)
       @abi unquote(Macro.escape(abi))
       @contract_address Keyword.get(@config, :contract_address)
-
-      priv_key =
-        case Web3.parse_privkey(Keyword.get(@config, :priv_key)) do
-          {:ok, priv_key} -> priv_key
-          _ -> nil
-        end
-
-      @priv_key priv_key
+      @priv_key Keyword.get(@config, :priv_key)
 
       def abi(), do: @abi
       def address(), do: @contract_address
@@ -112,7 +105,7 @@ defmodule Web3.ABI.Compiler do
   end
 
   def calc_signature(name, inputs) do
-    [name, ?(, inputs |> Enum.map(&Web3.ABI.type_name(elem(&1, 1))) |> Enum.join(","), ?)]
+    [name, ?(, inputs |> Enum.map(&Web3.ABI.Types.name(elem(&1, 1))) |> Enum.join(","), ?)]
     |> IO.iodata_to_binary()
     |> ExKeccak.hash_256()
     |> Web3.ABI.to_hex()
@@ -125,7 +118,7 @@ defmodule Web3.ABI.Compiler do
         Logger.error("Event #{inspect(event_name)}: empty param name")
       end
 
-      {String.to_atom(name), Web3.ABI.parse_type(type_def), [indexed: indexed]}
+      {String.to_atom(name), Web3.ABI.Types.parse(type_def), [indexed: indexed]}
     end)
   end
 
@@ -137,7 +130,7 @@ defmodule Web3.ABI.Compiler do
         |> String.trim_leading("_")
         |> String.to_atom()
 
-      {param, Web3.ABI.parse_type(type_def)}
+      {param, Web3.ABI.Types.parse(type_def)}
     end)
   end
 

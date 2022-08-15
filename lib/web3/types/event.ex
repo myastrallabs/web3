@@ -58,7 +58,7 @@ defmodule Web3.Type.Event do
         value
       end)
 
-    {:ok, data_fields} = Web3.ABI.TypeDecoder.decode_data(data, data_field_types)
+    {:ok, data_fields} = Web3.ABI.decode(data, data_field_types)
 
     fields = build_event([], inputs, data_fields, indexed_fields)
     struct!(event_module, fields)
@@ -79,7 +79,7 @@ defmodule Web3.Type.Event do
       inputs
       |> Enum.map(fn
         {name, type, meta} ->
-          type = Web3.ABI.type_name(type)
+          type = Web3.ABI.Types.name(type)
 
           if meta[:indexed] do
             "#{type} indexed #{name}"

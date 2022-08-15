@@ -29,7 +29,7 @@ defmodule Web3.ABITest do
     ]
 
     for {text, parsed} <- types do
-      assert Web3.ABI.parse_type(%{type: text}) == parsed
+      assert Web3.ABI.Types.parse(%{type: text}) == parsed
     end
   end
 end

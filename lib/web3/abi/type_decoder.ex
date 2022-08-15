@@ -3,19 +3,124 @@ defmodule Web3.ABI.TypeDecoder do
 
   require Logger
 
-  def decode_data(data, types) do
-    with {:ok, values, _offset} <- decode_data(data, types, 0) do
-      {:ok, values}
+  import Web3.ABI.Types
+
+  @spec decode_type(binary(), term(), integer()) :: {:ok, term()} | :error
+  def decode_type(data, type, offset \\ 0)
+
+  def decode_type(data, :address, offset) do
+    <<_::bytes-size(offset), address::256, _::binary()>> = data
+    Web3.Type.Address.cast(address)
+  end
+
+  def decode_type(data, :bool, offset) do
+    <<_::bytes-size(offset), bool::256, _::binary()>> = data
+
+    case bool do
+      1 -> {:ok, true}
+      0 -> {:ok, false}
+      _ -> :error
     end
   end
 
-  def decode_data(data, types, offset) do
+  for i <- 1..32 do
+    def decode_type(data, {:bytes, unquote(i)}, offset) do
+      <<_::bytes-size(offset), bytes::bytes-size(unquote(i)), _padding::bytes-size(unquote(32 - i)), _::bytes()>> = data
+
+      {:ok, bytes}
+    end
+  end
+
+  for i <- 1..31 do
+    def decode_type(data, {:int, unquote(i * 8)}, offset) do
+      <<_::bytes-size(offset), _::unquote(256 - i * 8), int::signed-unquote(i * 8), _::bytes()>> = data
+
+      {:ok, int}
+    end
+  end
+
+  def decode_type(data, {:int, 256}, offset) do
+    <<_::bytes-size(offset), int::signed-256, _::binary()>> = data
+    {:ok, int}
+  end
+
+  for i <- 1..31 do
+    def decode_type(data, {:uint, unquote(i * 8)}, offset) do
+      <<_::bytes-size(offset), _::unquote(256 - i * 8), uint::unquote(i * 8), _::bytes()>> = data
+      {:ok, uint}
+    end
+  end
+
+  def decode_type(data, {:uint, 256}, offset) do
+    <<_::bytes-size(offset), uint::256, _::binary()>> = data
+    {:ok, uint}
+  end
+
+  def decode_type(data, {:tuple, inner_types}, offset) do
+    <<_skipped::bytes-size(offset), inner_data::bytes()>> = data
+
+    with {:ok, values} <- decode(inner_data, inner_types) do
+      {:ok, List.to_tuple(values)}
+    end
+  end
+
+  def decode_type(data, :bytes, offset) do
+    <<_skipped::bytes-size(offset), len::256, bytes::bytes-size(len), _::bytes()>> = data
+    {:ok, bytes}
+  end
+
+  def decode_type(data, :string, offset) do
+    <<_skipped::bytes-size(offset), len::256, string::bytes-size(len), _::bytes()>> = data
+    {:ok, string}
+  end
+
+  def decode_type(data, {:array, inner_type}, offset) do
+    <<_skipped::bytes-size(offset), len::256, inner_data::bytes()>> = data
+    decode_array(inner_data, inner_type, len)
+  end
+
+  def decode_type(data, {:array, inner_type, len}, offset) do
+    <<_::bytes-size(offset), inner_data::binary()>> = data
+    decode_array(inner_data, inner_type, len)
+  end
+
+  # TODO: fixed types
+  def decode_type(_, type, _data) do
+    throw({:unknow_type, type})
+  end
+
+  defp decode_array(data, inner_type, len) do
+    if dynamic_type?(inner_type) do
+      {:ok, inner_offsets} = decode(data, List.duplicate({:uint, 256}, len))
+
+      inner_values =
+        for inner_offset <- inner_offsets do
+          {:ok, inner_value} = decode_type(data, inner_type, inner_offset)
+          inner_value
+        end
+
+      {:ok, inner_values}
+    else
+      decode(data, List.duplicate(inner_type, len))
+    end
+  end
+
+  def decode(data, types) do
     types
-    |> Enum.reduce_while({offset, []}, fn
-      type, {off, acc} ->
-        case decode_type(data, type, off) do
-          {:ok, value, new_off} ->
-            {:cont, {new_off, [value | acc]}}
+    |> Enum.reduce_while({0, []}, fn
+      type, {base_offset, acc} ->
+        offset =
+          if dynamic_type?(type) do
+            <<_::bytes-size(base_offset), dynamic_offset::256, _::binary()>> = data
+            dynamic_offset
+          else
+            base_offset
+          end
+
+        case decode_type(data, type, offset) do
+          {:ok, value} ->
+            new_offset = base_offset + head_size(type)
+            {:cont, {new_offset, [value | acc]}}
 
           :error ->
             {:halt, :error}
@@ -23,103 +128,7 @@ defmodule Web3.ABI.TypeDecoder do
     end)
     |> case do
       :error -> :error
-      {new_offset, values} -> {:ok, Enum.reverse(values), new_offset}
+      {_offset, values} -> {:ok, Enum.reverse(values)}
     end
-  end
-
-  @spec decode_type(binary(), term(), binary()) :: {:ok, term(), binary()} | :error
-  def decode_type(data, :address, offset) do
-    <<_::bytes-size(offset), address::256, _::binary()>> = data
-
-    case Web3.Type.Address.cast(address) do
-      {:ok, address} ->
-        {:ok, address, offset + 32}
-
-      _ ->
-        :error
-    end
-  end
-
-  def decode_type(data, {:uint, _size}, offset) do
-    <<_::bytes-size(offset), uint::256, _::binary()>> = data
-    {:ok, uint, offset + 32}
-  end
-
-  def decode_type(data, :bool, offset) do
-    <<_::bytes-size(offset), bool::256, _::binary()>> = data
-    {:ok, bool > 0, offset + 32}
-  end
-
-  for i <- 1..32 do
-    def decode_type(data, {:bytes, unquote(i)}, offset) do
-      <<_::bytes-size(offset), bytes::bytes-size(unquote(i)), _padding::bytes-size(unquote(32 - i))>> = data
-
-      case Web3.Type.Bytes.cast(bytes) do
-        {:ok, bytes} ->
-          {:ok, bytes, offset + 32}
-
-        _ ->
-          :error
-      end
-    end
-  end
-
-  for i <- 1..31 do
-    def decode_type(data, {:int, unquote(i * 8)}, offset) do
-      <<_::bytes-size(offset), _::signed-unquote(256 - i * 8), n::signed-unquote(i * 8)>> = data
-      {:ok, n, offset + 32}
-    end
-  end
-
-  def decode_type(data, {:int, 256}, offset) do
-    <<_::bytes-size(offset), int::signed-256, _::binary()>> = data
-    {:ok, int, offset + 32}
-  end
-
-  def decode_type(data, {:tuple, inner_types}, offset) do
-    with {:ok, values, new_offset} <- decode_data(data, inner_types, offset) do
-      {:ok, List.to_tuple(values), new_offset}
-    end
-  end
-
-  def decode_type(data, :bytes, offset) do
-    <<_::bytes-size(offset), bytes_offset::256, _::binary()>> = data
-    <<_skipped::bytes-size(bytes_offset), len::256, bytes::bytes-size(len), _::bytes()>> = data
-
-    case Web3.Type.Data.cast(bytes) do
-      {:ok, bytes} ->
-        {:ok, bytes, offset + 32}
-
-      _ ->
-        :error
-    end
-  end
-
-  def decode_type(data, :string, offset) do
-    <<_::bytes-size(offset), str_offset::256, _::bytes()>> = data
-    <<_skipped::bytes-size(str_offset), len::256, string::bytes-size(len), _::bytes()>> = data
-    {:ok, string, offset + 32}
-  end
-
-  def decode_type(data, {:array, inner_type}, offset) do
-    <<_::bytes-size(offset), array_offset::256, _::binary()>> = data
-    <<_skipped::bytes-size(array_offset), len::256, rest::bytes()>> = data
-
-    case decode_data(rest, List.duplicate(inner_type, len), 0) do
-      {:ok, values, _inner_offset} ->
-        {:ok, values, offset + 32}
-
-      _ ->
-        :error
-    end
-  end
-
-  def decode_type(data, {:array, inner_type, len}, offset) do
-    decode_data(data, List.duplicate(inner_type, len), offset)
-  end
-
-  # TODO
-  def decode_type(_, type, _data) do
-    throw({:unknow_type, type})
   end
 end

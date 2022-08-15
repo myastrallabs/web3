@@ -56,7 +56,7 @@ defmodule Web3.Middleware.Parser do
   def after_failure(%Pipeline{method: :__skip_parser__} = pipeline), do: pipeline
 
   def after_failure(%Pipeline{} = pipeline) do
-    Logger.info("Request Failed")
+    Logger.error("Request Failed: #{inspect(pipeline)}")
     pipeline
   end
 
@@ -123,6 +123,11 @@ defmodule Web3.Middleware.Parser do
     {:ok, {param, decode_data}}
   end
 
+  defp from_response(%{id: id, error: result}, id_to_params, _return_fn) when is_map(id_to_params) do
+    param = Map.fetch!(id_to_params, id)
+    {:error, %{param: param, error: result}}
+  end
+
   defp id_to_params(params) do
     params
     |> Stream.with_index()
@@ -137,7 +142,7 @@ defmodule Web3.Middleware.Parser do
 
   def decode_value("0x" <> return_value, return_types) do
     {:ok, data} = Base.decode16(return_value, case: :mixed)
-    Web3.ABI.TypeDecoder.decode_data(data, return_types)
+    Web3.ABI.decode(data, return_types)
   end
 
   def unwrap([]), do: nil
