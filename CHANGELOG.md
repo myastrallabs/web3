@@ -1,3 +1,8 @@
+## v0.1.5
+
+- Improve abi from `https://github.com/Kabie/abx/tree/main/lib/abx`
+- Fixed `Web3.Middleware.Parse` after_dispatch
+
 ## v0.1.4
 
 - Get failed http request without `raise`
