@@ -123,6 +123,11 @@ defmodule Web3.Middleware.Parser do
     {:ok, {param, decode_data}}
   end
 
+  defp from_response(%{id: id, error: result}, id_to_params, _return_fn) when is_map(id_to_params) do
+    param = Map.fetch!(id_to_params, id)
+    {:error, %{param: param, error: result}}
+  end
+
   defp id_to_params(params) do
     params
     |> Stream.with_index()
