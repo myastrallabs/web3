@@ -56,7 +56,7 @@ defmodule Web3.Middleware.Parser do
   def after_failure(%Pipeline{method: :__skip_parser__} = pipeline), do: pipeline
 
   def after_failure(%Pipeline{} = pipeline) do
-    Logger.info("Request Failed")
+    Logger.error("Request Failed: #{inspect(pipeline)}")
     pipeline
   end
 
