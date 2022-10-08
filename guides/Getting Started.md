@@ -6,7 +6,7 @@ Web3 can be installed from the package manager hex as follows.
 
     ```elixir
     def deps do
-      [{:web3, "~> 0.1.5"}]
+      [{:web3, "~> 0.1.6"}]
     end
     ```
 2. Fetch mix dependencies:
