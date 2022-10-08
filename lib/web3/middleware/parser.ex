@@ -77,15 +77,23 @@ defmodule Web3.Middleware.Parser do
   def parse_args([], result), do: Enum.reverse(result)
 
   # parse eth_getLogs
-  defp do_parse_args(%{fromBlock: from_block, toBlock: to_block} = entry) do
+  defp do_parse_args(%{fromBlock: from_block, toBlock: to_block} = entry) when is_map(entry) do
     entry
     |> Map.put(:fromBlock, Web3.to_hex(from_block))
     |> Map.put(:toBlock, Web3.to_hex(to_block))
   end
 
+  # parse eth_estimateGas
+  defp do_parse_args(%{gas_limit: gas, gas_price: gas_price, value: value} = entry) when is_map(entry) do
+    entry
+    |> Map.put(:gas, Web3.to_hex(gas))
+    |> Map.put(:gasPrice, Web3.to_hex(gas_price))
+    |> Map.put(:value, Web3.to_hex(value))
+  end
+
   defp do_parse_args(entry) when is_binary(entry), do: entry
   defp do_parse_args(entry) when is_integer(entry), do: Web3.to_hex(entry)
-  defp do_parse_args(entry) when is_list(entry), do: Enum.map(entry, &Web3.to_hex/1)
+  defp do_parse_args(entry) when is_list(entry), do: Enum.map(entry, &do_parse_args/1)
 
   defp do_parse_args(_from.._to = entry) do
     {from, to} = Enum.min_max(entry)
