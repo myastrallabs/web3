@@ -54,7 +54,7 @@ defmodule Web3.Type.Event do
       |> Enum.map(&Web3.ABI.unhex/1)
       |> Enum.zip(indexed_field_types)
       |> Enum.map(fn {bytes, type} ->
-        {:ok, value, _} = Web3.ABI.TypeDecoder.decode_type(bytes, type, 0)
+        {:ok, value} = Web3.ABI.TypeDecoder.decode_type(bytes, type, 0)
         value
       end)
 
